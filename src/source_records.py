@@ -31,15 +31,25 @@ DATA_DIR = os.path.join(REPO_ROOT, "data")
 
 PURCHASE_REGISTER_CSV = os.path.join(DATA_DIR, "purchase_register.csv")
 GSTR2B_CSV = os.path.join(DATA_DIR, "gstr2b.csv")
+GSTR2B_PRIOR_PERIOD_CSV = os.path.join(DATA_DIR, "gstr2b_prior_period.csv")
 
 SOURCE_PURCHASE_REGISTER = "purchase_register"
 SOURCE_GSTR2B = "gstr2b"
+# §2.5 prior-period snapshot: the signal that disambiguates no_candidate_found
+# into invoice-removed-post-claim vs late-filed-supplier. A pipeline input like
+# any other — it carries no labels, only what the supplier had filed last period.
+SOURCE_PRIOR_PERIOD = "gstr2b_prior_period"
 
 # Files the pipeline is allowed to read. Anything else is a programming error.
 PIPELINE_SOURCES = {
     SOURCE_PURCHASE_REGISTER: PURCHASE_REGISTER_CSV,
     SOURCE_GSTR2B: GSTR2B_CSV,
+    SOURCE_PRIOR_PERIOD: GSTR2B_PRIOR_PERIOD_CSV,
 }
+
+# The two files that are reconciled against each other. The prior-period
+# snapshot is consulted by the rule engine but is not itself reconciled.
+MATCHING_SOURCES = (SOURCE_PURCHASE_REGISTER, SOURCE_GSTR2B)
 
 
 @dataclass(frozen=True)
@@ -93,5 +103,5 @@ def load_source(source: str, path: str = "") -> List[SourceRecord]:
 
 
 def load_all_sources() -> Iterator[SourceRecord]:
-    for source in (SOURCE_PURCHASE_REGISTER, SOURCE_GSTR2B):
+    for source in MATCHING_SOURCES:
         yield from load_source(source)

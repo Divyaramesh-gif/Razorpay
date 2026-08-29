@@ -1,0 +1,123 @@
+# Exception Ledger — versioned GST rules (Architecture v2 §2.5)
+#
+# ONE file, TWO categories, reported as TWO SEPARATE TABLES — never merged into
+# one blended list:
+#
+#   classification_rules  what happened
+#   operational_checks    what to do about it, and by when
+#
+# This file holds the version-sensitive PARAMETERS (tolerances, thresholds,
+# window lengths, credit-note patterns). The matching logic lives in
+# src/rule_engine.py, which is deterministic Python — no LLM decides a GST
+# classification. Changing a number here changes the rules; it never changes
+# which code path runs.
+
+version: "2026-04"
+effective_from: "2026-04-01"
+return_period: "2026-04"
+description: >-
+  GST reconciliation rules in force for the April 2026 return period.
+
+# ---------------------------------------------------------------------------
+# Classification rules — WHAT HAPPENED
+# ---------------------------------------------------------------------------
+# Evaluated in listed order; the first rule whose conditions hold is the one
+# reported. Ordering matters: the absence rules only apply when the matcher
+# returned no_candidate_found, so they can never collide with the pair rules.
+
+classification_rules:
+
+  - id: CLS-001
+    name: gstin_header_mismatch
+    applies_to: matched_pair
+    description: >-
+      The supplier filed under a different state registration than the register
+      recorded. The state-code prefix differs while the PAN is identical, and
+      the tax heads flip between CGST+SGST and IGST — the signature of a
+      CGST/SGST vs IGST filing error rather than a value dispute.
+    conditions:
+      gstin_state_prefix_differs: true
+      pan_identical: true            # chars 3-12 — same legal entity
+      tax_head_profile_differs: true # cgst_sgst on one side, igst on the other
+      total_tax_delta_tolerance: 1.00
+
+  - id: CLS-002
+    name: credit_note_netting
+    applies_to: matched_pair
+    description: >-
+      GSTR-2B is net of a credit note the purchase register has not yet
+      absorbed. The 2B amount is LOWER than the register amount by a value
+      matching a known credit-note pattern.
+    conditions:
+      direction: pr_exceeds_2b       # register higher; the credit reduced 2B
+      minimum_delta: 1.00            # anything smaller is a rounding difference
+      gstin_must_match: true         # otherwise it is a header case, not a credit note
+      credit_note_patterns:
+        - type: fixed_amount
+          values: [1000.00, 2500.00, 5000.00, 10000.00]
+          tolerance: 1.00
+        - type: percentage_of_taxable
+          values: [10.0]
+          tolerance: 1.00
+
+  - id: CLS-003
+    name: invoice_removed_post_claim
+    applies_to: no_candidate_found
+    description: >-
+      The invoice is absent from the current GSTR-2B but PRESENT in the
+      prior-period snapshot: the supplier withdrew or amended it after input
+      tax credit had already been claimed.
+    conditions:
+      present_in_prior_period_snapshot: true
+
+  - id: CLS-004
+    name: late_filed_supplier
+    applies_to: no_candidate_found
+    description: >-
+      The invoice is absent from the current GSTR-2B and was absent from the
+      prior period too: the supplier has simply not filed it yet.
+    conditions:
+      present_in_prior_period_snapshot: false
+
+# ---------------------------------------------------------------------------
+# Operational checks — WHAT TO DO ABOUT IT, AND BY WHEN
+# ---------------------------------------------------------------------------
+# Reported in their own table. These are deadlines and thresholds, not
+# explanations, and they are evaluated independently of which classification
+# rule fired (or whether any did).
+
+operational_checks:
+
+  - id: OPS-88D
+    name: rule_88d_response_window
+    description: >-
+      Rule 88D gives the taxpayer 7 days from the date of intimation to respond
+      to an ITC mismatch. Elapsed time is measured against the dataset's
+      simulated_current_date, never a wall clock.
+    parameters:
+      window_days: 7
+      intimation_date_field: rule88d_intimation_date
+      current_date_field: simulated_current_date
+    statuses:
+      - within_window       # >= 0 and <= window_days since intimation
+      - outside_window      # past the deadline
+      - not_applicable      # no intimation issued (no mismatch to respond to)
+
+  - id: OPS-DRC01C
+    name: drc_01c_threshold
+    description: >-
+      DRC-01C auto-notice trigger. Cumulative ITC variance is summed per
+      supplier GSTIN across the whole batch; a supplier over the threshold is
+      flagged. A no_candidate_found record puts the entire claimed ITC at risk,
+      so its full tax value counts toward the supplier's variance.
+    parameters:
+      threshold_rupees: 75000.00
+      aggregate_by: pr_vendor_gstin
+      # NOTE: this is a SYNTHETIC trigger sized to this dataset, not the
+      # statutory Rs.25 lakh test — no invoice in this batch approaches that,
+      # and the check would never fire. See README "Assumptions".
+      statutory_threshold_rupees: 2500000.00
+      statutory_threshold_applied: false
+    statuses:
+      - breached
+      - within_threshold

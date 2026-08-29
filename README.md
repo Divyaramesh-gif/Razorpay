@@ -13,9 +13,9 @@ Section references below (§) point into it.
 | 1 | `data/generate_dataset.py` | **Done** — Part 1 |
 | 2 | `src/validation.py` + `src/quarantine_log.py` | **Done** — Phase 2 |
 | 3 | `src/normalization.py` | **Done** — Phase 2 |
-| 4 | `src/matcher.py` + `tests/test_matcher.py` | Not started |
-| 5 | `src/evidence.py` | Not started |
-| 6 | `src/rule_engine.py` + `src/rules/rules_v2026_04.yaml` | Not started |
+| 4 | `src/matcher.py` + `tests/test_matcher.py` | **Done** — Phase 3 |
+| 5 | `src/evidence.py` | **Done** — Phase 3 |
+| 6 | `src/rule_engine.py` + `src/rules/rules_v2026_04.yaml` | **Done** — Phase 3 |
 | 7 | `src/confidence.py` + `src/gate.py` | Not started |
 | 8 | `src/audit_log.py` + `src/report.py` + `src/pipeline.py` | Not started |
 
@@ -180,6 +180,86 @@ rewriting one would also destroy the evidence the §2.5 GSTIN-header rule depend
 on. `standardize_gstin()` therefore standardises presentation (casing,
 separators) and leaves the digits alone.
 
+## Phase 3 — matching, evidence, rules
+
+```bash
+python3 run_phase3.py            # matching -> evidence -> rules
+python3 -m pytest tests/ -q      # 262 tests
+```
+
+Phase 3 stops at the rule engine. There is deliberately **no confidence score
+and no auto-reconcile / exception / indeterminate outcome** — that is the §2.6
+gate, build step 7.
+
+| Module | Section | Responsibility |
+|---|---|---|
+| `src/matcher.py` | §2.3 | Score matrix + greedy one-to-one assignment |
+| `src/evidence.py` | §2.4 | Plain field-by-field diff, no verdict |
+| `src/rule_engine.py` | §2.5 | Classification rules + operational checks |
+| `src/rules/rules_v2026_04.yaml` | §2.5 | The versioned parameters |
+
+### The one-to-one guarantee
+
+Enforced structurally, not checked afterwards: a record enters `claimed_pr` or
+`claimed_2b` the moment it is assigned, and every later pair touching it is
+skipped. There is no path through `greedy_assign()` that assigns either side
+twice. Ties break on `(pr_id, b2_id)`, so the assignment is reproducible
+regardless of input order.
+
+`tests/test_matcher.py` proves it four ways: on the real batch, on 5 identical
+records competing for 5 identical counterparts, on 10 records competing for 2,
+and as a property test over 200 random score matrices.
+
+### Scoring
+
+Exact fields carry 100 of the 116 available points, fuzzy fields 16 — §2.3's
+"exact highest, fuzzy lower but non-zero".
+
+| Signal | Points | Kind |
+|---|---|---|
+| invoice number exact | 40 | exact |
+| GSTIN exact | 30 | exact |
+| GSTIN same PAN, different state | 20 | exact-ish |
+| amount within ₹1 | 30 | exact |
+| amount within 2% / 10% | 12 / 6 | partial |
+| vendor name (rapidfuzz) | ≤ 10 | fuzzy |
+| invoice number garbled | ≤ 8 | fuzzy |
+| date same / ≤2d / ≤7d / ≤30d | 6 / 4 / 2 / 1 | fuzzy |
+
+`MIN_CANDIDATE_SCORE = 45` sits just above GSTIN(30) + a perfect name(10) + a
+weak date(2) = 42 — the profile of two *unrelated* invoices from the same
+supplier, which is the dominant false-pair shape. It was swept 20..60 on the
+**calibration split only**; the frozen 30% is not a tuning surface.
+
+### Rules: two categories, never merged
+
+`rules_v2026_04.yaml` holds the version-sensitive **parameters**; the logic is
+deterministic Python. **No LLM participates in any GST classification** — a test
+asserts `rule_engine.py` cannot even reach the Anthropic SDK.
+
+| Category | Rules |
+|---|---|
+| Classification (what happened) | CLS-001 GSTIN header mismatch · CLS-002 credit-note netting · CLS-003 invoice removed post-claim · CLS-004 late-filed supplier |
+| Operational (what to do, by when) | OPS-88D 7-day response window · OPS-DRC01C cumulative ITC variance |
+
+CLS-003 and CLS-004 are separated solely by whether the invoice appears in
+`gstr2b_prior_period.csv`, which joins the pipeline as a source in this phase.
+
+### Measured results
+
+| Stage | Result |
+|---|---|
+| Matching accuracy | 97.3% overall (calibration 97.9%, frozen 95.9%) |
+| Matching, 7 well-defined case types | 100% |
+| One-to-one property | Holds — 443 pairs, 443 distinct 2B records |
+| Classification accuracy | 97.5% |
+| CLS-001 / CLS-002 | 100%, zero false positives |
+| Rule 88D | 65 within window, 50 outside, 365 n/a — matches the dataset |
+| DRC-01C | 12 of 40 suppliers breach |
+
+Every classification error traces to a matcher miss on a deliberately ambiguous
+or absent record, not to a rule misfiring — asserted by a test.
+
 ## Assumptions
 
 The locked architecture references "the earlier defect-distribution spec" (§5
@@ -212,9 +292,9 @@ way to satisfy §2.5.
 step 2 onward, so it lives in its own module in the spirit of §3.2 ("define it
 once as a dataclass; every downstream stage consumes the same shape").
 
-`run_phase2.py` (repo root, not `src/`) is temporary scaffolding so Phase 2 can
-be exercised before steps 4-7 exist. It will be absorbed into `src/pipeline.py`
-at step 8 and deleted.
+`run_phase2.py` and `run_phase3.py` (repo root, not `src/`) are temporary
+scaffolding so each phase can be exercised before step 8 exists. They will be
+absorbed into `src/pipeline.py` and deleted.
 
 The repo root maps to the architecture's `exception-ledger/` root, so `data/`,
 `src/` and `tests/` sit at the top level rather than nested one directory deeper.

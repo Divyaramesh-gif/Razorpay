@@ -125,11 +125,26 @@ def test_loading_ground_truth_through_the_loader_is_refused():
         load_source("ground_truth")
 
 
-def test_loader_knows_only_the_two_source_files():
-    from src.source_records import PIPELINE_SOURCES
-    assert set(PIPELINE_SOURCES) == {SOURCE_PURCHASE_REGISTER, SOURCE_GSTR2B}
-    assert set(PIPELINE_SOURCES.values()) == {PURCHASE_REGISTER_CSV, GSTR2B_CSV}
+def test_loader_knows_only_the_declared_pipeline_files():
+    """The prior-period snapshot joined in Phase 3 (§2.5). Ground truth still
+    must not be reachable."""
+    from src.source_records import (GSTR2B_PRIOR_PERIOD_CSV, MATCHING_SOURCES,
+                                    PIPELINE_SOURCES, SOURCE_PRIOR_PERIOD)
+    assert set(PIPELINE_SOURCES) == {SOURCE_PURCHASE_REGISTER, SOURCE_GSTR2B,
+                                     SOURCE_PRIOR_PERIOD}
+    assert set(PIPELINE_SOURCES.values()) == {
+        PURCHASE_REGISTER_CSV, GSTR2B_CSV, GSTR2B_PRIOR_PERIOD_CSV}
     assert GROUND_TRUTH_CSV not in PIPELINE_SOURCES.values()
+    assert MATCHING_SOURCES == (SOURCE_PURCHASE_REGISTER, SOURCE_GSTR2B)
+
+
+def test_prior_period_snapshot_carries_no_labels():
+    """It is consulted as evidence, so it must look like a source file, not
+    like an answer key."""
+    from src.source_records import SOURCE_PRIOR_PERIOD
+    columns = set(load_source(SOURCE_PRIOR_PERIOD)[0].raw)
+    assert not (columns & {"case_type", "expected_outcome", "split",
+                           "expected_classification", "match_type"})
 
 
 # --- independent source ids -------------------------------------------------
