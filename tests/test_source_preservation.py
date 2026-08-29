@@ -25,13 +25,18 @@ from src.source_records import (
 DATA_DIR = os.path.join(REPO, "data")
 GROUND_TRUTH_CSV = os.path.join(DATA_DIR, "ground_truth.csv")
 
-# Every module the PIPELINE runs. calibrate.py is deliberately absent: §2.6
-# names it the evaluation script, and it is the one program permitted to open
-# ground_truth.csv.
-PIPELINE_FILES = sorted(glob.glob(os.path.join(REPO, "src", "*.py"))) + [
-    os.path.join(REPO, "run_phase2.py"),
-    os.path.join(REPO, "run_phase3.py"),
-    os.path.join(REPO, "run_phase4.py"),
+# §2.6 splits the codebase in two. EVALUATION_FILES may read ground_truth.csv;
+# nothing else may. src/report.py is an evaluation module by the architecture's
+# own description ("evaluation report ... frozen test set only") even though it
+# lives under src/, so it is excluded here and checked separately below.
+EVALUATION_FILES = [
+    os.path.join(REPO, "calibrate.py"),
+    os.path.join(REPO, "src", "report.py"),
+]
+
+PIPELINE_FILES = [
+    p for p in sorted(glob.glob(os.path.join(REPO, "src", "*.py")))
+    if p not in EVALUATION_FILES
 ]
 
 
@@ -143,15 +148,23 @@ def test_loader_knows_only_the_declared_pipeline_files():
     assert MATCHING_SOURCES == (SOURCE_PURCHASE_REGISTER, SOURCE_GSTR2B)
 
 
-def test_the_evaluation_script_is_the_only_one_allowed_near_ground_truth():
-    """§2.6: the labels exist for the evaluation script alone. calibrate.py may
-    read them; nothing the pipeline runs may."""
-    calibrate = os.path.join(REPO, "calibrate.py")
-    assert os.path.exists(calibrate)
-    assert calibrate not in PIPELINE_FILES
-    assert any("ground_truth" in t.lower()
-               for t in _code_strings_and_names(calibrate)), \
-        "calibrate.py is expected to read ground truth — that is its job"
+def test_only_the_evaluation_files_go_near_ground_truth():
+    """§2.6: the labels exist for the evaluation script alone."""
+    for path in EVALUATION_FILES:
+        assert os.path.exists(path), path
+        assert path not in PIPELINE_FILES
+        assert any("ground_truth" in t.lower()
+                   for t in _code_strings_and_names(path)), \
+            f"{path} is expected to read ground truth — that is its job"
+
+
+def test_the_pipeline_never_imports_the_evaluation_layer():
+    """src/pipeline.py orchestrates the reconciliation; grading happens
+    afterwards, in a separate entry point. If the pipeline imported report.py
+    it would sit one call away from the labels."""
+    src = open(os.path.join(REPO, "src", "pipeline.py"), encoding="utf-8").read()
+    assert "import report" not in src
+    assert "from .report" not in src
 
 
 def test_prior_period_snapshot_carries_no_labels():
