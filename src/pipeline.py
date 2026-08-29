@@ -39,6 +39,7 @@ audit log precisely so both can refuse them.
 from __future__ import annotations
 
 import os
+from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence
 
@@ -88,6 +89,31 @@ class PipelineResult:
     rules_version: str
     db_path: str
     ai_assisted: bool = False
+    # §2.2 AI-half outcomes. Diagnostic only — the AI half can never change a
+    # decision the deterministic half would not also reach, so these counters
+    # stay out of fingerprint(). They exist so a run where every call failed is
+    # distinguishable from one where nothing needed repairing.
+    ai_stats: Dict[str, int] = field(default_factory=dict)
+
+    @property
+    def ai_attempted(self) -> int:
+        return self.ai_stats.get(N.AI_ATTEMPTED, 0)
+
+    @property
+    def ai_applied(self) -> int:
+        return self.ai_stats.get(N.AI_APPLIED, 0)
+
+    @property
+    def ai_failed(self) -> int:
+        """Calls that raised, plus responses rejected by the §2.2 contract."""
+        return (self.ai_stats.get(N.AI_CALL_FAILED, 0)
+                + self.ai_stats.get(N.AI_CONTRACT_VIOLATION, 0))
+
+    @property
+    def ai_fell_back_entirely(self) -> bool:
+        """The AI half was asked for, tried, and produced nothing usable."""
+        return (self.ai_assisted and self.ai_attempted > 0
+                and self.ai_failed == self.ai_attempted)
 
     @property
     def scored(self) -> int:
@@ -143,6 +169,7 @@ def run(db_path: str = DEFAULT_DB_PATH,
     records_read: Dict[str, int] = {}
     normalised: Dict[str, List[NormalizedRecord]] = {}
     quarantined: List[QuarantineEntry] = []
+    ai_stats: Counter = Counter()
 
     with QuarantineLog(db_path, now=now) as qlog:
         qlog.clear()
@@ -152,7 +179,8 @@ def run(db_path: str = DEFAULT_DB_PATH,
             valid, invalid = V.partition(records)
             qlog.quarantine_all(invalid)
             normalised[source] = [
-                N.normalize(result.record, ai_client) for result in valid
+                N.normalize(result.record, ai_client, ai_stats)
+                for result in valid
             ]
         quarantined = qlog.entries()
 
@@ -194,6 +222,7 @@ def run(db_path: str = DEFAULT_DB_PATH,
         rules_version=batch.rules_version,
         db_path=db_path,
         ai_assisted=ai_client is not None,
+        ai_stats=dict(ai_stats),
     )
 
 
@@ -269,6 +298,28 @@ def _main(argv=None) -> int:
     print(f"  {'quarantined (§2.1)':<22} {result.quarantined_count:>4}  "
           f"exits the pipeline, never scored")
     print(f"  {'scored':<22} {result.scored:>4}\n")
+
+    # §2.2 AI half. Reported unconditionally: a run where every call failed
+    # must not look like a run where nothing needed repairing. The pipeline is
+    # correct either way — the deterministic value stands — but the operator
+    # needs to know which of the two happened before treating a batch as
+    # AI-normalised.
+    if not args.ai:
+        print(f"  {'AI-assisted normalisation':<22}  not requested "
+              f"(deterministic half only)")
+    else:
+        print(f"  {'AI-assisted normalisation':<22}  "
+              f"{result.ai_attempted} field(s) sent, "
+              f"{result.ai_applied} repaired, "
+              f"{result.ai_stats.get(N.AI_UNCHANGED, 0)} unchanged, "
+              f"{result.ai_failed} failed")
+        if result.ai_fell_back_entirely:
+            print("  !! EVERY AI CALL FAILED — the deterministic result stands for")
+            print("     all of them. This batch is NOT AI-normalised. Check")
+            print("     credentials before treating it as such.")
+        elif result.ai_attempted == 0:
+            print("     (nothing was messy enough to send)")
+    print()
 
     print(f"  matched {len(result.match_result.matched)}  "
           f"no_candidate_found {len(result.match_result.no_candidate)}  "

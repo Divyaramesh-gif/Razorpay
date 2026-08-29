@@ -202,3 +202,100 @@ def test_audit_confidence_matches_the_gate_decision(result):
         assert by_id[decision.record_id].confidence_score == \
             decision.confidence.value
         assert by_id[decision.record_id].action == decision.outcome
+
+
+# ==========================================================================
+# §2.2 AI-half outcomes must be visible in the CLI
+# ==========================================================================
+# Regression guard. The AI half falls back to the deterministic value on any
+# failure, which keeps the pipeline correct but means a run where every call
+# failed produces byte-identical decisions to one where nothing needed
+# repairing. If the CLI does not say which happened, an operator can read
+# exit 0 as "the batch was AI-normalised" when it was not.
+
+class _AlwaysFailsClient:
+    """Stands in for an Anthropic client with no usable credentials."""
+
+    messages = property(lambda self: self)
+
+    def create(self, **kwargs):
+        raise TypeError("Could not resolve authentication method.")
+
+
+class _AlwaysRepairsClient:
+    """Every call succeeds and returns a cleaned string."""
+
+    messages = property(lambda self: self)
+
+    def create(self, **kwargs):
+        return type("R", (), {"content": [
+            type("B", (), {"type": "text",
+                           "text": '{"cleaned_text": "Repaired Name"}'})()]})()
+
+
+def test_stats_are_empty_when_the_ai_half_is_off(result):
+    assert result.ai_assisted is False
+    assert result.ai_attempted == 0
+    assert result.ai_failed == 0
+    assert result.ai_fell_back_entirely is False
+
+
+def test_a_fully_failed_ai_run_is_counted(tmp_path):
+    run = P.run(db_path=str(tmp_path / "fail.sqlite"), now=FIXED_NOW,
+                ai_client=_AlwaysFailsClient())
+    assert run.ai_assisted is True
+    assert run.ai_attempted > 0
+    assert run.ai_applied == 0
+    assert run.ai_failed == run.ai_attempted
+    assert run.ai_fell_back_entirely is True
+
+
+def test_a_fully_failed_ai_run_is_visible_in_the_cli(tmp_path, monkeypatch, capsys):
+    """The bug this guards: exit 0 with no indication the AI half was dead."""
+    from src import normalization as Nz
+    monkeypatch.setattr(Nz, "build_client", lambda: _AlwaysFailsClient())
+
+    exit_code = P._main(["--ai", "--db", str(tmp_path / "cli.sqlite"),
+                         "--now", FIXED_NOW])
+    out = capsys.readouterr().out
+
+    assert exit_code == 0
+    assert "EVERY AI CALL FAILED" in out
+    assert "NOT AI-normalised" in out
+    assert "field(s) sent" in out
+    assert "0 repaired" in out
+
+
+def test_a_successful_ai_run_does_not_warn(tmp_path, monkeypatch, capsys):
+    """The warning must be specific to total failure, not fire on every run."""
+    from src import normalization as Nz
+    monkeypatch.setattr(Nz, "build_client", lambda: _AlwaysRepairsClient())
+
+    P._main(["--ai", "--db", str(tmp_path / "ok.sqlite"), "--now", FIXED_NOW])
+    out = capsys.readouterr().out
+
+    assert "EVERY AI CALL FAILED" not in out
+    assert "repaired" in out
+
+
+def test_the_offline_run_says_the_ai_half_was_not_requested(tmp_path, capsys):
+    P._main(["--db", str(tmp_path / "off.sqlite"), "--now", FIXED_NOW])
+    out = capsys.readouterr().out
+    assert "not requested" in out
+    assert "EVERY AI CALL FAILED" not in out
+
+
+def test_a_failed_ai_half_changes_no_decision(tmp_path, result):
+    """The fallback must be exactly the deterministic result — the reporting
+    change must not have altered what the pipeline decides."""
+    failed = P.run(db_path=str(tmp_path / "f.sqlite"), now=FIXED_NOW,
+                   ai_client=_AlwaysFailsClient())
+    assert P.fingerprint(failed) == P.fingerprint(result)
+
+
+def test_ai_stats_stay_out_of_the_fingerprint(tmp_path, result):
+    """Diagnostics are not decisions."""
+    failed = P.run(db_path=str(tmp_path / "g.sqlite"), now=FIXED_NOW,
+                   ai_client=_AlwaysFailsClient())
+    assert failed.ai_stats != result.ai_stats
+    assert P.fingerprint(failed) == P.fingerprint(result)
