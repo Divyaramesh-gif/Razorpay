@@ -16,8 +16,9 @@ Section references below (§) point into it.
 | 4 | `src/matcher.py` + `tests/test_matcher.py` | **Done** — Phase 3 |
 | 5 | `src/evidence.py` | **Done** — Phase 3 |
 | 6 | `src/rule_engine.py` + `src/rules/rules_v2026_04.yaml` | **Done** — Phase 3 |
-| 7 | `src/confidence.py` + `src/gate.py` | Not started |
-| 8 | `src/audit_log.py` + `src/report.py` + `src/pipeline.py` | Not started |
+| 7 | `src/confidence.py` + `src/gate.py` | **Done** — Phase 4 |
+| 8 | `src/audit_log.py` | **Done** — Phase 4 |
+| 8 | `src/report.py` + `src/pipeline.py` | Not started |
 
 ## Pipeline (§1)
 
@@ -260,6 +261,91 @@ CLS-003 and CLS-004 are separated solely by whether the invoice appears in
 Every classification error traces to a matcher miss on a deliberately ambiguous
 or absent record, not to a rule misfiring — asserted by a test.
 
+## Phase 4 — confidence, gate, audit log
+
+```bash
+python3 calibrate.py --report-frozen   # §2.6 calibration (run once)
+python3 run_phase4.py                  # confidence -> gate -> audit log
+python3 -m pytest tests/ -q            # 350 tests
+```
+
+| Module | Section | Responsibility |
+|---|---|---|
+| `src/confidence.py` | §2.6 | Evidence-derived weighted score + the threshold sweep |
+| `src/gate.py` | §2.6 | The three-way outcome |
+| `src/audit_log.py` | §2.7 | One row per record that passed validation |
+| `src/rules/calibration_v2026_04.yaml` | §2.6 | The frozen threshold |
+| `calibrate.py` | §2.6 | The evaluation script — the only program that may read ground truth |
+
+### Confidence comes from evidence, not a model
+
+A weighted count of matching fields in the §2.4 diff — "GSTIN and amount matter
+more than date formatting", as §2.6 requires:
+
+| Field | Weight |
+|---|---|
+| gstin | 30 |
+| amount | 30 |
+| invoice_number | 20 |
+| date | 10 |
+| vendor_name | 5 |
+| tax_heads | 5 |
+
+Weights sum to 100 so a score reads as a percentage. `score_evidence()` is a
+pure function: no model, no network, no file. A test asserts `confidence.py`
+cannot reach the Anthropic SDK, and the audit log stores the evidence snapshot
+next to the score so an auditor can re-add the weights by hand.
+
+### The calibration protocol, and how it is enforced
+
+1. The 70/30 split was assigned in `data/generate_dataset.py` **before any
+   tuning** and is read, never re-derived.
+2. `sweep_thresholds()` takes `(score, label)` pairs **as arguments** and reads
+   no file — so it is structurally impossible to calibrate on the frozen split
+   by accident. Only `calibrate.py` supplies labels, and only calibration-split
+   rows.
+3. The frozen 30% is scored **once**, at the end, and reported. No re-tuning.
+
+Result: threshold **80.25**, the midpoint of a tied plateau spanning 70.5–90.
+An endpoint would sit flush against a score cluster and generalise worse.
+
+### The three-way gate
+
+| Outcome | Condition |
+|---|---|
+| Auto-reconcile | Confidence ≥ threshold **and** evidence is a clean match |
+| Classified exception | Below threshold, but a rule assigns a named category |
+| Indeterminate → human review | No rule can assign a category |
+
+"Clean match" means `gstin`, `amount` and `invoice_number` all agree. A date off
+by a day or a differently-spelled vendor name is cosmetic — that is what lets
+the fuzzy cases auto-reconcile while a credit-note or header case cannot.
+
+**Quarantine is not a gate outcome.** `decide_batch()` raises if a quarantined
+record is passed in, and `AuditLog.record()` refuses to write one — checking the
+quarantine table in the same database. §2.7's "one row per record that passed
+validation" is true by construction, not by convention.
+
+### Measured results
+
+| Measure | Result |
+|---|---|
+| Score separation | True matches 90–100, everything else 0–70 — a **20-point gap** |
+| Calibration split | sensitivity 1.000, specificity 1.000 (TP 254, FP 0, TN 81, FN 0) |
+| Frozen split (scored once) | sensitivity 1.000, specificity 1.000 (TP 111, FP 0, TN 34, FN 0) |
+| Outcome accuracy | 97.5% overall (calibration 97.9%, frozen 96.6%) |
+| Auto-reconcile | 365/365, **zero false auto-reconciles** |
+
+Gate outcomes: 365 auto-reconcile, 92 classified exception, 23 indeterminate,
+with 20 quarantined reported separately. All 12 outcome disagreements are the
+Phase 3 matcher misses cascading forward, not new gate errors — asserted by a
+test.
+
+The perfect separation is a property of this synthetic dataset, where the
+injected defects damage high-weight fields and the fuzzy cases damage only
+low-weight ones. Real filings would overlap; treat these numbers as evidence the
+protocol is wired correctly, not as an expected production figure.
+
 ## Assumptions
 
 The locked architecture references "the earlier defect-distribution spec" (§5
@@ -292,9 +378,16 @@ way to satisfy §2.5.
 step 2 onward, so it lives in its own module in the spirit of §3.2 ("define it
 once as a dataclass; every downstream stage consumes the same shape").
 
-`run_phase2.py` and `run_phase3.py` (repo root, not `src/`) are temporary
-scaffolding so each phase can be exercised before step 8 exists. They will be
-absorbed into `src/pipeline.py` and deleted.
+`run_phase2.py`, `run_phase3.py` and `run_phase4.py` (repo root, not `src/`)
+are temporary scaffolding so each phase can be exercised before step 8 exists.
+They will be absorbed into `src/pipeline.py` and deleted.
+
+`src/rules/calibration_v2026_04.yaml` and `calibrate.py` are not in the §4
+listing. §2.6 requires a calibrated threshold produced by an evaluation script
+that sees labels, and a pipeline that does not — which needs somewhere to keep
+the frozen number and something to produce it. Keeping the machine-derived
+value out of the hand-written rules file also preserves its provenance (when it
+was calibrated, on what split, what the sweep found).
 
 The repo root maps to the architecture's `exception-ledger/` root, so `data/`,
 `src/` and `tests/` sit at the top level rather than nested one directory deeper.

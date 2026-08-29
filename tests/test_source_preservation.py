@@ -25,8 +25,13 @@ from src.source_records import (
 DATA_DIR = os.path.join(REPO, "data")
 GROUND_TRUTH_CSV = os.path.join(DATA_DIR, "ground_truth.csv")
 
+# Every module the PIPELINE runs. calibrate.py is deliberately absent: §2.6
+# names it the evaluation script, and it is the one program permitted to open
+# ground_truth.csv.
 PIPELINE_FILES = sorted(glob.glob(os.path.join(REPO, "src", "*.py"))) + [
-    os.path.join(REPO, "run_phase2.py")
+    os.path.join(REPO, "run_phase2.py"),
+    os.path.join(REPO, "run_phase3.py"),
+    os.path.join(REPO, "run_phase4.py"),
 ]
 
 
@@ -136,6 +141,17 @@ def test_loader_knows_only_the_declared_pipeline_files():
         PURCHASE_REGISTER_CSV, GSTR2B_CSV, GSTR2B_PRIOR_PERIOD_CSV}
     assert GROUND_TRUTH_CSV not in PIPELINE_SOURCES.values()
     assert MATCHING_SOURCES == (SOURCE_PURCHASE_REGISTER, SOURCE_GSTR2B)
+
+
+def test_the_evaluation_script_is_the_only_one_allowed_near_ground_truth():
+    """§2.6: the labels exist for the evaluation script alone. calibrate.py may
+    read them; nothing the pipeline runs may."""
+    calibrate = os.path.join(REPO, "calibrate.py")
+    assert os.path.exists(calibrate)
+    assert calibrate not in PIPELINE_FILES
+    assert any("ground_truth" in t.lower()
+               for t in _code_strings_and_names(calibrate)), \
+        "calibrate.py is expected to read ground truth — that is its job"
 
 
 def test_prior_period_snapshot_carries_no_labels():

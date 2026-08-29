@@ -1,0 +1,44 @@
+version: 2026-04
+calibrated_at: '2026-08-29T06:09:25+00:00'
+protocol: "Architecture v2 \xA72.6. Threshold swept on the 70% calibration split only;\
+  \ the frozen 30% is touched once, at the end, and never tuned against. The split\
+  \ itself was assigned in data/generate_dataset.py before any tuning."
+confidence_gate:
+  threshold: 80.25
+  scale: 0-100, weighted count of matching evidence fields
+  selection: maximum Youden's J; midpoint of the widest tied plateau
+  plateau:
+  - 70.5
+  - 90.0
+field_weights:
+  gstin: 30.0
+  amount: 30.0
+  invoice_number: 20.0
+  date: 10.0
+  vendor_name: 5.0
+  tax_heads: 5.0
+clean_match_fields:
+- gstin
+- amount
+- invoice_number
+calibration_split:
+  n_records: 335
+  n_true_matches: 254
+  sensitivity: 1.0
+  specificity: 1.0
+  accuracy: 1.0
+  true_positives: 254
+  false_positives: 0
+  true_negatives: 81
+  false_negatives: 0
+frozen_test_split:
+  n_records: 145
+  n_true_matches: 111
+  sensitivity: 1.0
+  specificity: 1.0
+  accuracy: 1.0
+  true_positives: 111
+  false_positives: 0
+  true_negatives: 34
+  false_negatives: 0
+  note: Touched once at the stated threshold. Not re-tuned.
