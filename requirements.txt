@@ -6,5 +6,5 @@
 
 rapidfuzz==3.9.7      # §2.3 fuzzy vendor-name similarity in src/matcher.py
 PyYAML==6.0.2         # §2.5 src/rules/rules_v2026_04.yaml loading
-anthropic==0.39.0     # §2.2 normalize_ai_assisted() Claude API call
+anthropic==1.2.0      # §2.2 normalize_ai_assisted() Claude API call (output_config needs >=1.x)
 pytest==8.3.3         # §5 tests/
