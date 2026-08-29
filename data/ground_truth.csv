@@ -1,0 +1,501 @@
+pr_record_id,gstr2b_record_id,invoice_id,vendor_id,vendor_gstin,case_type,defect_family,match_type,expected_validation_error,expected_classification,expected_outcome,amount_delta,credit_note_amount,in_prior_period_snapshot,vendor_cumulative_itc_variance,expected_drc01c_breach,expected_rule88d_within_window,split,notes
+PR-0001,2B-0201,INV-2604-00001,V038,02CTMNE5571B1Z6,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,125710.64,true,,frozen_test,all comparison fields identical
+PR-0002,2B-0173,INV-2604-00002,V021,27YIYXG2138V1Z2,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,111231.08,true,,frozen_test,all comparison fields identical
+PR-0003,2B-0147,INV-2604-00003,V008,33DBDFF6066I1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1025.00,false,,calibration,all comparison fields identical
+PR-0004,2B-0197,INV-2604-00004,V004,22JLIUB3888G1ZO,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0005,2B-0389,INV-2604-00005,V025,23EANLL0258A1ZB,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B vendor_name rendered as 'M/s Crestline Textiles India Pvt. Ltd.'
+PR-0006,2B-0255,INV-2604-00006,V027,27BBEVF0062J1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,55586.43,false,,calibration,all comparison fields identical
+PR-0007,2B-0413,INV-2604-00007,V034,32MWNUU2669X1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0008,2B-0228,INV-2604-00008,V010,24MMKOP2707A1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,12535.93,false,,frozen_test,all comparison fields identical
+PR-0009,2B-0039,INV-2604-00009,V027,27BBEVF0062J1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,55586.43,false,,frozen_test,all comparison fields identical
+PR-0010,2B-0119,INV-2604-00010,V002,27NOMNQ8836X1Z2,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,82859.47,true,,calibration,all comparison fields identical
+PR-0011,2B-0060,INV-2604-00011,V026,27VGUPQ1274N1ZX,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,0.00,false,true,calibration,PR CGST/SGST under state 27; 2B IGST under state 05; total tax equal
+PR-0012,2B-0051,INV-2604-00012,V024,24WIIYL3578T1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0013,2B-0281,INV-2604-00013,V023,32ZQZIP1711S1ZR,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-1000.00,1000.00,false,4744.52,false,false,frozen_test,2B net of credit note Rs.1000.00
+PR-0014,2B-0077,INV-2604-00014,V017,27ITFXL3590N1ZG,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,40727.16,false,,frozen_test,all comparison fields identical
+PR-0015,2B-0388,INV-2604-00015,V007,27NFAOH7689K1ZL,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,79774.05,true,,calibration,all comparison fields identical
+PR-0016,2B-0379,INV-2604-00016,V016,27NNHOE5359S1ZX,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,176.08,false,false,frozen_test,PR CGST/SGST under state 27; 2B IGST under state 02; total tax equal
+PR-0017,2B-0079,INV-2604-00017,V022,27CBGHX9945C1ZJ,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,50272.05,false,false,frozen_test,PR CGST/SGST under state 27; 2B IGST under state 33; total tax equal
+PR-0018,2B-0078,INV-2604-00018,V010,24MMKOP2707A1Z7,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-5383.62,,false,12535.93,false,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0019,2B-0169,INV-2604-00019,V040,10RCYAZ9838E1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,22886.35,false,,calibration,all comparison fields identical
+PR-0020,2B-0081,INV-2604-00020,V036,27GFSXR6677W1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,148917.54,true,,frozen_test,all comparison fields identical
+PR-0021,2B-0470,INV-2604-00021,V019,32LHGYK3148I1ZP,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0022,2B-0483,INV-2604-00022,V035,06WWDLC2591N1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1400.00,false,,frozen_test,all comparison fields identical
+PR-0023,2B-0088,INV-2604-00023,V023,32ZQZIP1711S1ZR,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,4744.52,false,,calibration,all comparison fields identical
+PR-0024,2B-0407,INV-2604-00024,V010,24MMKOP2707A1Z7,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-6001.65,,false,12535.93,false,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0025,2B-0187,INV-2604-00025,V009,06ZUWQL5692X1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,54891.06,false,,calibration,all comparison fields identical
+PR-0026,,INV-2604-00026,V022,27CBGHX9945C1ZJ,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,50272.05,false,true,calibration,"present in prior-period snapshot, absent from current 2B"
+PR-0027,2B-0402,INV-2604-00027,V010,24MMKOP2707A1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,12535.93,false,,frozen_test,all comparison fields identical
+PR-0028,2B-0238,INV-2604-00028,V002,27NOMNQ8836X1Z2,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,82859.47,true,,frozen_test,all comparison fields identical
+PR-0029,2B-0200,INV-2604-00029,V026,27VGUPQ1274N1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0030,2B-0376,INV-2604-00030,V033,03KJOEN7911O1Z1,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,124952.52,true,,frozen_test,all comparison fields identical
+PR-0031,2B-0142,INV-2604-00031,V040,10RCYAZ9838E1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,22886.35,false,,calibration,all comparison fields identical
+PR-0032,2B-0353,INV-2604-00032,V027,27BBEVF0062J1ZM,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-7335.22,,false,55586.43,false,false,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0033,2B-0273,INV-2604-00033,V009,06ZUWQL5692X1Z7,quarantine_bad_date,invalid_input,quarantined,unparseable_or_implausible_date,,quarantine,0.00,,false,54891.06,false,,calibration,invoice_date '2026-02-31' unparseable or implausible
+PR-0034,2B-0163,INV-2604-00034,V030,03RFLNG9701F1ZD,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-2862.99,,false,164457.37,true,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0035,2B-0159,INV-2604-00035,V016,27NNHOE5359S1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,176.08,false,,calibration,all comparison fields identical
+PR-0036,2B-0131,INV-2604-00036,V016,27NNHOE5359S1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,176.08,false,,calibration,all comparison fields identical
+PR-0037,2B-0280,INV-2604-00037,V010,24MMKOP2707A1Z7,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,0.20,,false,12535.93,false,,calibration,taxable_value differs by Rs.0.20 (within Rs.1)
+PR-0038,2B-0409,INV-2604-00038,V034,32MWNUU2669X1ZI,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,0.16,,false,0.00,false,,calibration,taxable_value differs by Rs.0.16 (within Rs.1)
+PR-0039,2B-0123,INV-2604-00039,V023,32ZQZIP1711S1ZR,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-2500.00,2500.00,false,4744.52,false,false,calibration,2B net of credit note Rs.2500.00
+PR-0040,2B-0036,INV-2604-00040,V005,37AKHBP5432H1ZS,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,220.28,false,,frozen_test,all comparison fields identical
+PR-0041,2B-0058,INV-2604-00041,V025,23EANLL0258A1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0042,2B-0032,INV-2604-00042,V023,32ZQZIP1711S1ZR,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,4744.52,false,,calibration,all comparison fields identical
+PR-0043,2B-0454,INV-2604-00043,V034,32MWNUU2669X1ZI,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,2B invoice_date shifted by -2 day(s)
+PR-0044,2B-0042,INV-2604-00044,V033,03KJOEN7911O1Z1,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,124952.52,true,,calibration,all comparison fields identical
+PR-0045,2B-0323,INV-2604-00045,V027,27BBEVF0062J1ZM,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,55586.43,false,,calibration,"2B vendor_name OCR-corrupted to 'Konark Fabricat0,rs and C0mpany'"
+PR-0046,2B-0002,INV-2604-00046,V018,08STSKE2455Y1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,115774.46,true,,frozen_test,all comparison fields identical
+PR-0047,2B-0302,INV-2604-00047,V026,27VGUPQ1274N1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0048,2B-0043,INV-2604-00048,V013,10CLWJW0153B1ZL,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,103578.27,true,,calibration,2B vendor_name OCR-corrupted to 'Jy0ti  Agr0 LLP'
+PR-0049,2B-0179,INV-2604-00049,V017,27ITFXL3590N1ZG,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,40727.16,false,,calibration,2B vendor_name rendered as 'GANGA ENTERPRISES INDIA PVT. LTD.'
+PR-0050,2B-0202,INV-2604-00050,V022,27CBGHX9945C1ZJ,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,-0.65,,false,50272.05,false,,frozen_test,taxable_value differs by Rs.0.65 (within Rs.1)
+PR-0051,2B-0360,INV-2604-00051,V037,27DDBTQ1492W1ZA,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,42652.92,false,false,calibration,PR CGST/SGST under state 27; 2B IGST under state 23; total tax equal
+PR-0052,2B-0290,INV-2604-00052,V014,01KPAMG7469R1ZE,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0053,2B-0375,INV-2604-00053,V040,10RCYAZ9838E1Z7,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,22886.35,false,,calibration,2B vendor_name OCR-corrupted to 'Crest1ine  Traders and C0mpany'
+PR-0054,2B-0416,INV-2604-00054,V027,27BBEVF0062J1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,55586.43,false,,frozen_test,all comparison fields identical
+PR-0055,2B-0172,INV-2604-00055,V030,03RFLNG9701F1ZD,quarantine_bad_date,invalid_input,quarantined,unparseable_or_implausible_date,,quarantine,0.00,,false,164457.37,true,,frozen_test,invoice_date '31/04/2026' unparseable or implausible
+PR-0056,2B-0422,INV-2604-00056,V040,10RCYAZ9838E1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,22886.35,false,,frozen_test,all comparison fields identical
+PR-0057,2B-0026,INV-2604-00057,V001,27HPBHZ2966J1ZI,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,141109.19,true,false,frozen_test,PR CGST/SGST under state 27; 2B IGST under state 08; total tax equal
+PR-0058,2B-0423,INV-2604-00058,V012,27WOIJO2003E1Z3,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,47331.39,false,,frozen_test,all comparison fields identical
+PR-0059,2B-0193,INV-2604-00059,V021,27YIYXG2138V1Z2,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,111231.08,true,,calibration,all comparison fields identical
+PR-0060,2B-0292,INV-2604-00060,V027,27BBEVF0062J1ZM,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-1827.62,,false,55586.43,false,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0061,2B-0027,INV-2604-00061,V014,01KPAMG7469R1ZE,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0062,2B-0017,INV-2604-00062,V005,37AKHBP5432H1ZS,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,220.28,false,,frozen_test,2B vendor_name rendered as 'KONARK INDUSTRIES & CO.'
+PR-0063,2B-0295,INV-2604-00063,V002,27NOMNQ8836X1Z2,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,82859.47,true,false,calibration,PR CGST/SGST under state 27; 2B IGST under state 24; total tax equal
+PR-0064,2B-0356,INV-2604-00064,V034,32MWNUU2669X1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0065,2B-0348,INV-2604-00065,V037,27DDBTQ1492W1ZA,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,0.04,,false,42652.92,false,,frozen_test,taxable_value differs by Rs.0.04 (within Rs.1)
+PR-0066,2B-0034,INV-2604-00066,V009,06ZUWQL5692X1Z7,quarantine_missing_field,invalid_input,quarantined,missing_required_field,,quarantine,0.00,,false,54891.06,false,,frozen_test,taxable_value blank
+PR-0067,2B-0370,INV-2604-00067,V026,27VGUPQ1274N1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0068,,INV-2604-00068,V001,27HPBHZ2966J1ZI,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,141109.19,true,true,calibration,"present in prior-period snapshot, absent from current 2B"
+PR-0069,2B-0045,INV-2604-00069,V037,27DDBTQ1492W1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,42652.92,false,,calibration,all comparison fields identical
+PR-0070,2B-0371,INV-2604-00070,V031,27GFTDT0664D1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,8396.10,false,,calibration,all comparison fields identical
+PR-0071,2B-0062,INV-2604-00071,V003,32EVDGL6232O1ZV,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B invoice_date shifted by -1 day(s)
+PR-0072,2B-0367,INV-2604-00072,V010,24MMKOP2707A1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,12535.93,false,,calibration,all comparison fields identical
+PR-0073,2B-0425,INV-2604-00073,V036,27GFSXR6677W1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,148917.54,true,,calibration,all comparison fields identical
+PR-0074,2B-0218,INV-2604-00074,V035,06WWDLC2591N1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1400.00,false,,calibration,all comparison fields identical
+PR-0075,2B-0408,INV-2604-00075,V006,27MGAGX0940T1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,28774.39,false,,calibration,all comparison fields identical
+PR-0076,2B-0455,INV-2604-00076,V003,32EVDGL6232O1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0077,2B-0385,INV-2604-00077,V032,27AVGFB0339Q1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1781.30,false,,calibration,all comparison fields identical
+PR-0078,2B-0466,INV-2604-00078,V037,27DDBTQ1492W1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,42652.92,false,,calibration,all comparison fields identical
+PR-0079,2B-0293,INV-2604-00079,V020,08PAPRB6119M1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,804.60,false,,calibration,all comparison fields identical
+PR-0080,2B-0234,INV-2604-00080,V036,27GFSXR6677W1Z0,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,148917.54,true,false,frozen_test,PR CGST/SGST under state 27; 2B IGST under state 01; total tax equal
+PR-0081,2B-0303,INV-2604-00081,V009,06ZUWQL5692X1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,54891.06,false,,frozen_test,all comparison fields identical
+PR-0082,2B-0068,INV-2604-00082,V021,27YIYXG2138V1Z2,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,111231.08,true,,calibration,all comparison fields identical
+PR-0083,2B-0460,INV-2604-00083,V015,09RUTFG7986V1ZZ,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,0.47,,false,71790.02,false,,frozen_test,taxable_value differs by Rs.0.47 (within Rs.1)
+PR-0084,2B-0311,INV-2604-00084,V015,09RUTFG7986V1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,71790.02,false,,calibration,all comparison fields identical
+PR-0085,2B-0340,INV-2604-00085,V037,27DDBTQ1492W1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,42652.92,false,,frozen_test,all comparison fields identical
+PR-0086,2B-0441,INV-2604-00086,V029,29NKVKQ5588B1Z9,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,1328.86,false,,calibration,2B vendor_name rendered as 'WAVELENGTH FABRICATORS PVT LTD'
+PR-0087,2B-0390,INV-2604-00087,V028,21SKPXR4660P1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0088,2B-0057,INV-2604-00088,V001,27HPBHZ2966J1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,all comparison fields identical
+PR-0089,2B-0031,INV-2604-00089,V013,10CLWJW0153B1ZL,quarantine_bad_gstin,invalid_input,quarantined,invalid_gstin_format,,quarantine,0.00,,false,103578.27,true,,calibration,gstin truncated to 14 characters
+PR-0090,2B-0427,INV-2604-00090,V005,37AKHBP5432H1ZS,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,220.28,false,,calibration,all comparison fields identical
+PR-0091,2B-0092,INV-2604-00091,V021,27YIYXG2138V1Z2,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,111231.08,true,true,frozen_test,PR CGST/SGST under state 27; 2B IGST under state 06; total tax equal
+PR-0092,2B-0178,INV-2604-00092,V005,37AKHBP5432H1ZS,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,0.75,,false,220.28,false,,calibration,taxable_value differs by Rs.0.75 (within Rs.1)
+PR-0093,2B-0239,INV-2604-00093,V029,29NKVKQ5588B1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1328.86,false,,frozen_test,all comparison fields identical
+PR-0094,2B-0117,INV-2604-00094,V038,02CTMNE5571B1Z6,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,125710.64,true,,frozen_test,"2B vendor_name OCR-corrupted to 'Wavelength 5tee1 and Com,pany'"
+PR-0095,2B-0480,INV-2604-00095,V007,27NFAOH7689K1ZL,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,79774.05,true,,calibration,all comparison fields identical
+PR-0096,2B-0188,INV-2604-00096,V024,24WIIYL3578T1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0097,2B-0484,INV-2604-00097,V014,01KPAMG7469R1ZE,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0098,2B-0224,INV-2604-00098,V006,27MGAGX0940T1ZV,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,28774.39,false,,calibration,"2B vendor_name OCR-corrupted to '8harat Enterprises 1ndia Private L,imited'"
+PR-0099,2B-0242,INV-2604-00099,V007,27NFAOH7689K1ZL,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,79774.05,true,true,calibration,PR CGST/SGST under state 27; 2B IGST under state 02; total tax equal
+PR-0100,2B-0082,INV-2604-00100,V015,09RUTFG7986V1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,71790.02,false,,calibration,all comparison fields identical
+PR-0101,2B-0256,INV-2604-00101,V013,10CLWJW0153B1ZL,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,103578.27,true,,calibration,all comparison fields identical
+PR-0102,2B-0296,INV-2604-00102,V039,02LJWUK8178Q1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,11338.70,false,,calibration,all comparison fields identical
+PR-0103,2B-0174,INV-2604-00103,V015,09RUTFG7986V1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,71790.02,false,,calibration,all comparison fields identical
+PR-0104,2B-0482,INV-2604-00104,V008,33DBDFF6066I1ZB,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-5000.00,5000.00,false,1025.00,false,false,calibration,2B net of credit note Rs.5000.00
+PR-0105,2B-0300,INV-2604-00105,V031,27GFTDT0664D1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,8396.10,false,,calibration,all comparison fields identical
+PR-0106,2B-0449,INV-2604-00106,V019,32LHGYK3148I1ZP,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0107,2B-0232,INV-2604-00107,V014,01KPAMG7469R1ZE,quarantine_bad_date,invalid_input,quarantined,unparseable_or_implausible_date,,quarantine,0.00,,false,0.00,false,,calibration,invoice_date '2026-13-05' unparseable or implausible
+PR-0108,2B-0229,INV-2604-00108,V025,23EANLL0258A1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0109,2B-0090,INV-2604-00109,V022,27CBGHX9945C1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,50272.05,false,,calibration,all comparison fields identical
+PR-0110,2B-0436,INV-2604-00110,V040,10RCYAZ9838E1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,22886.35,false,,calibration,all comparison fields identical
+PR-0111,2B-0191,INV-2604-00111,V011,27ZNNUA5329D1Z8,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-5000.00,5000.00,false,113979.29,true,true,calibration,2B net of credit note Rs.5000.00
+PR-0112,2B-0186,INV-2604-00112,V019,32LHGYK3148I1ZP,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0113,2B-0111,INV-2604-00113,V039,02LJWUK8178Q1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,11338.70,false,,calibration,all comparison fields identical
+PR-0114,2B-0136,INV-2604-00114,V010,24MMKOP2707A1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,12535.93,false,,frozen_test,all comparison fields identical
+PR-0115,2B-0140,INV-2604-00115,V028,21SKPXR4660P1ZJ,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B invoice_date shifted by -2 day(s)
+PR-0116,,INV-2604-00116,V021,27YIYXG2138V1Z2,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,111231.08,true,true,frozen_test,"present in prior-period snapshot, absent from current 2B"
+PR-0117,2B-0459,INV-2604-00117,V022,27CBGHX9945C1ZJ,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,50272.05,false,false,frozen_test,PR CGST/SGST under state 27; 2B IGST under state 02; total tax equal
+PR-0118,2B-0236,INV-2604-00118,V010,24MMKOP2707A1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,12535.93,false,,calibration,all comparison fields identical
+PR-0119,2B-0347,INV-2604-00119,V037,27DDBTQ1492W1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,42652.92,false,,calibration,all comparison fields identical
+PR-0120,2B-0010,INV-2604-00120,V017,27ITFXL3590N1ZG,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,40727.16,false,,calibration,all comparison fields identical
+PR-0121,2B-0421,INV-2604-00121,V011,27ZNNUA5329D1Z8,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,113979.29,true,,frozen_test,2B vendor_name rendered as 'Deccan  Ent.  LLP'
+PR-0122,2B-0225,INV-2604-00122,V030,03RFLNG9701F1ZD,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,164457.37,true,,frozen_test,all comparison fields identical
+PR-0123,2B-0021,INV-2604-00123,V004,22JLIUB3888G1ZO,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0124,,INV-2604-00124,V036,27GFSXR6677W1Z0,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,148917.54,true,false,calibration,"present in prior-period snapshot, absent from current 2B"
+PR-0125,2B-0336,INV-2604-00125,V039,02LJWUK8178Q1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,11338.70,false,,frozen_test,all comparison fields identical
+PR-0126,2B-0359,INV-2604-00126,V027,27BBEVF0062J1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,55586.43,false,,calibration,all comparison fields identical
+PR-0127,2B-0233,INV-2604-00127,V035,06WWDLC2591N1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1400.00,false,,frozen_test,all comparison fields identical
+PR-0128,2B-0019,INV-2604-00128,V005,37AKHBP5432H1ZS,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,220.28,false,,frozen_test,all comparison fields identical
+PR-0129,2B-0001,INV-2604-00129,V016,27NNHOE5359S1ZX,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,176.08,false,,frozen_test,2B vendor_name rendered as 'MERIDIAN LOGISTICS INDIA PVT. LTD.'
+PR-0130,2B-0214,INV-2604-00130,V038,02CTMNE5571B1Z6,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,125710.64,true,,calibration,all comparison fields identical
+PR-0131,2B-0177,INV-2604-00131,V027,27BBEVF0062J1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,55586.43,false,,calibration,all comparison fields identical
+PR-0132,2B-0478,INV-2604-00132,V024,24WIIYL3578T1Z9,quarantine_bad_amount,invalid_input,quarantined,non_numeric_or_negative_amount,,quarantine,0.00,,false,0.00,false,,calibration,taxable_value is 'N/A'
+PR-0133,2B-0374,INV-2604-00133,V023,32ZQZIP1711S1ZR,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,4744.52,false,,calibration,all comparison fields identical
+PR-0134,2B-0067,INV-2604-00134,V004,22JLIUB3888G1ZO,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0135,2B-0215,INV-2604-00135,V029,29NKVKQ5588B1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1328.86,false,,calibration,all comparison fields identical
+PR-0136,2B-0403,INV-2604-00136,V001,27HPBHZ2966J1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,all comparison fields identical
+PR-0137,2B-0464,INV-2604-00137,V010,24MMKOP2707A1Z7,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,12535.93,false,,calibration,"2B vendor_name OCR-corrupted to 'Deccan S0lut,i0ns India Private Limited'"
+PR-0138,2B-0269,INV-2604-00138,V032,27AVGFB0339Q1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1781.30,false,,frozen_test,all comparison fields identical
+PR-0139,2B-0424,INV-2604-00139,V012,27WOIJO2003E1Z3,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-3023.50,,false,47331.39,false,false,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0140,2B-0127,INV-2604-00140,V039,02LJWUK8178Q1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,11338.70,false,,calibration,all comparison fields identical
+PR-0141,2B-0204,INV-2604-00141,V005,37AKHBP5432H1ZS,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-786.72,,false,220.28,false,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0142,2B-0263,INV-2604-00142,V012,27WOIJO2003E1Z3,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,47331.39,false,,frozen_test,all comparison fields identical
+PR-0143,2B-0125,INV-2604-00143,V040,10RCYAZ9838E1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,22886.35,false,,calibration,all comparison fields identical
+PR-0144,2B-0208,INV-2604-00144,V005,37AKHBP5432H1ZS,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,220.28,false,,calibration,all comparison fields identical
+PR-0145,2B-0314,INV-2604-00145,V012,27WOIJO2003E1Z3,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-2744.20,,false,47331.39,false,true,frozen_test,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0146,2B-0244,INV-2604-00146,V012,27WOIJO2003E1Z3,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,47331.39,false,,calibration,2B vendor_name rendered as 'M/s Quantum Polymers India Pvt. Ltd.'
+PR-0147,2B-0362,INV-2604-00147,V030,03RFLNG9701F1ZD,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,164457.37,true,,calibration,all comparison fields identical
+PR-0148,2B-0106,INV-2604-00148,V029,29NKVKQ5588B1Z9,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-2500.00,2500.00,false,1328.86,false,true,calibration,2B net of credit note Rs.2500.00
+PR-0149,2B-0205,INV-2604-00149,V011,27ZNNUA5329D1Z8,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,113979.29,true,,calibration,all comparison fields identical
+PR-0150,2B-0294,INV-2604-00150,V029,29NKVKQ5588B1Z9,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,0.36,,false,1328.86,false,,calibration,taxable_value differs by Rs.0.36 (within Rs.1)
+PR-0151,2B-0489,INV-2604-00151,V032,27AVGFB0339Q1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1781.30,false,,calibration,all comparison fields identical
+PR-0152,2B-0261,INV-2604-00152,V030,03RFLNG9701F1ZD,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,164457.37,true,,calibration,all comparison fields identical
+PR-0153,2B-0124,INV-2604-00153,V001,27HPBHZ2966J1ZI,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-7366.37,,false,141109.19,true,false,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0154,2B-0035,INV-2604-00154,V008,33DBDFF6066I1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1025.00,false,,calibration,all comparison fields identical
+PR-0155,2B-0387,INV-2604-00155,V005,37AKHBP5432H1ZS,quarantine_bad_amount,invalid_input,quarantined,non_numeric_or_negative_amount,,quarantine,0.00,,false,220.28,false,,calibration,taxable_value not numeric
+PR-0156,2B-0437,INV-2604-00156,V026,27VGUPQ1274N1ZX,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,2B vendor_name rendered as 'WAVELENGTH ENT. LLP'
+PR-0157,2B-0310,INV-2604-00157,V036,27GFSXR6677W1Z0,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,148917.54,true,false,calibration,PR CGST/SGST under state 27; 2B IGST under state 08; total tax equal
+PR-0158,2B-0128,INV-2604-00158,V027,27BBEVF0062J1ZM,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,55586.43,false,,calibration,"2B vendor_name OCR-corrupted to 'Konark Fabricat0,rs and C0mpany'"
+PR-0159,2B-0074,INV-2604-00159,V001,27HPBHZ2966J1ZI,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,2B invoice_date shifted by -1 day(s)
+PR-0160,2B-0217,INV-2604-00160,V033,03KJOEN7911O1Z1,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,124952.52,true,,calibration,all comparison fields identical
+PR-0161,2B-0474,INV-2604-00161,V033,03KJOEN7911O1Z1,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,124952.52,true,,calibration,all comparison fields identical
+PR-0162,2B-0276,INV-2604-00162,V014,01KPAMG7469R1ZE,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0163,2B-0146,INV-2604-00163,V018,08STSKE2455Y1ZA,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,115774.46,true,,calibration,2B invoice_date shifted by +2 day(s)
+PR-0164,2B-0185,INV-2604-00164,V011,27ZNNUA5329D1Z8,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,113979.29,true,,calibration,all comparison fields identical
+PR-0165,,INV-2604-00165,V017,27ITFXL3590N1ZG,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,40727.16,false,true,calibration,absent from current 2B and from the prior-period snapshot
+PR-0166,2B-0320,INV-2604-00166,V017,27ITFXL3590N1ZG,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,40727.16,false,,calibration,all comparison fields identical
+PR-0167,2B-0094,INV-2604-00167,V021,27YIYXG2138V1Z2,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-5000.00,5000.00,false,111231.08,true,true,calibration,2B net of credit note Rs.5000.00
+PR-0168,2B-0084,INV-2604-00168,V032,27AVGFB0339Q1ZZ,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-3515.67,,false,1781.30,false,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0169,2B-0171,INV-2604-00169,V024,24WIIYL3578T1Z9,quarantine_bad_amount,invalid_input,quarantined,non_numeric_or_negative_amount,,quarantine,0.00,,false,0.00,false,,calibration,taxable_value not numeric
+PR-0170,2B-0086,INV-2604-00170,V029,29NKVKQ5588B1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1328.86,false,,calibration,all comparison fields identical
+PR-0171,2B-0116,INV-2604-00171,V002,27NOMNQ8836X1Z2,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,82859.47,true,,frozen_test,all comparison fields identical
+PR-0172,2B-0004,INV-2604-00172,V009,06ZUWQL5692X1Z7,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,54891.06,false,,frozen_test,2B vendor_name OCR-corrupted to 'Bharat 5teel and C0mpany ;'
+PR-0173,2B-0319,INV-2604-00173,V008,33DBDFF6066I1ZB,quarantine_missing_field,invalid_input,quarantined,missing_required_field,,quarantine,0.00,,false,1025.00,false,,calibration,invoice_id blank
+PR-0174,2B-0291,INV-2604-00174,V016,27NNHOE5359S1ZX,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-1121.60,,false,176.08,false,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0175,2B-0467,INV-2604-00175,V037,27DDBTQ1492W1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,42652.92,false,,calibration,all comparison fields identical
+PR-0176,,INV-2604-00176,V037,27DDBTQ1492W1ZA,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,42652.92,false,false,frozen_test,absent from current 2B and from the prior-period snapshot
+PR-0177,2B-0324,INV-2604-00177,V029,29NKVKQ5588B1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1328.86,false,,calibration,all comparison fields identical
+PR-0178,2B-0107,INV-2604-00178,V004,22JLIUB3888G1ZO,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0179,2B-0465,INV-2604-00179,V016,27NNHOE5359S1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,176.08,false,,calibration,all comparison fields identical
+PR-0180,2B-0097,INV-2604-00180,V006,27MGAGX0940T1ZV,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,28774.39,false,true,calibration,PR CGST/SGST under state 27; 2B IGST under state 01; total tax equal
+PR-0181,2B-0445,INV-2604-00181,V015,09RUTFG7986V1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,71790.02,false,,calibration,all comparison fields identical
+PR-0182,2B-0249,INV-2604-00182,V037,27DDBTQ1492W1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,42652.92,false,,calibration,all comparison fields identical
+PR-0183,2B-0490,INV-2604-00183,V009,06ZUWQL5692X1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,54891.06,false,,calibration,all comparison fields identical
+PR-0184,2B-0332,INV-2604-00184,V007,27NFAOH7689K1ZL,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,79774.05,true,,calibration,2B vendor_name rendered as 'Zenith  Industries  India  Pvt.  Ltd.'
+PR-0185,2B-0162,INV-2604-00185,V016,27NNHOE5359S1ZX,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-1000.00,1000.00,false,176.08,false,false,frozen_test,2B net of credit note Rs.1000.00
+PR-0186,2B-0458,INV-2604-00186,V032,27AVGFB0339Q1ZZ,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-5599.29,,false,1781.30,false,true,frozen_test,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0187,2B-0283,INV-2604-00187,V014,01KPAMG7469R1ZE,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0188,2B-0321,INV-2604-00188,V008,33DBDFF6066I1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1025.00,false,,calibration,all comparison fields identical
+PR-0189,2B-0432,INV-2604-00189,V025,23EANLL0258A1ZB,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B invoice_date shifted by +1 day(s)
+PR-0190,2B-0318,INV-2604-00190,V028,21SKPXR4660P1ZJ,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,2B vendor_name OCR-corrupted to 'Hima1aya L0gistics Limited ;'
+PR-0191,2B-0198,INV-2604-00191,V028,21SKPXR4660P1ZJ,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,2B vendor_name rendered as 'Himalaya  Logistics  Ltd.'
+PR-0192,2B-0246,INV-2604-00192,V020,08PAPRB6119M1ZV,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,804.60,false,,frozen_test,2B invoice_date shifted by +1 day(s)
+PR-0193,2B-0473,INV-2604-00193,V008,33DBDFF6066I1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1025.00,false,,frozen_test,all comparison fields identical
+PR-0194,2B-0306,INV-2604-00194,V005,37AKHBP5432H1ZS,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,220.28,false,,frozen_test,all comparison fields identical
+PR-0195,,INV-2604-00195,V011,27ZNNUA5329D1Z8,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,113979.29,true,false,frozen_test,"present in prior-period snapshot, absent from current 2B"
+PR-0196,2B-0156,INV-2604-00196,V006,27MGAGX0940T1ZV,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-1114.18,,false,28774.39,false,true,frozen_test,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0197,2B-0377,INV-2604-00197,V009,06ZUWQL5692X1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,54891.06,false,,calibration,all comparison fields identical
+PR-0198,2B-0220,INV-2604-00198,V022,27CBGHX9945C1ZJ,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,50272.05,false,true,frozen_test,PR CGST/SGST under state 27; 2B IGST under state 21; total tax equal
+PR-0199,2B-0089,INV-2604-00199,V001,27HPBHZ2966J1ZI,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,141109.19,true,false,calibration,PR CGST/SGST under state 27; 2B IGST under state 02; total tax equal
+PR-0200,2B-0394,INV-2604-00200,V031,27GFTDT0664D1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,8396.10,false,,calibration,all comparison fields identical
+PR-0201,2B-0075,INV-2604-00201,V029,29NKVKQ5588B1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1328.86,false,,calibration,all comparison fields identical
+PR-0202,2B-0382,INV-2604-00202,V001,27HPBHZ2966J1ZI,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,2B vendor_name rendered as 'ELMWOOD INDS. LLP'
+PR-0203,2B-0192,INV-2604-00203,V011,27ZNNUA5329D1Z8,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,113979.29,true,,calibration,2B vendor_name rendered as 'DECCAN ENT. LLP'
+PR-0204,2B-0059,INV-2604-00204,V004,22JLIUB3888G1ZO,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0205,2B-0289,INV-2604-00205,V006,27MGAGX0940T1ZV,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,28774.39,false,true,calibration,PR CGST/SGST under state 27; 2B IGST under state 07; total tax equal
+PR-0206,2B-0345,INV-2604-00206,V031,27GFTDT0664D1ZM,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-2500.00,2500.00,false,8396.10,false,false,frozen_test,2B net of credit note Rs.2500.00
+PR-0207,2B-0333,INV-2604-00207,V023,32ZQZIP1711S1ZR,quarantine_bad_gstin,invalid_input,quarantined,invalid_gstin_format,,quarantine,0.00,,false,4744.52,false,,calibration,gstin truncated to 14 characters
+PR-0208,2B-0337,INV-2604-00208,V038,02CTMNE5571B1Z6,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,125710.64,true,,calibration,2B vendor_name rendered as 'WAVELENGTH STEEL & CO.'
+PR-0209,2B-0453,INV-2604-00209,V002,27NOMNQ8836X1Z2,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-5776.67,,false,82859.47,true,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0210,2B-0206,INV-2604-00210,V001,27HPBHZ2966J1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,all comparison fields identical
+PR-0211,2B-0322,INV-2604-00211,V018,08STSKE2455Y1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,115774.46,true,,calibration,all comparison fields identical
+PR-0212,2B-0399,INV-2604-00212,V012,27WOIJO2003E1Z3,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,47331.39,false,,calibration,all comparison fields identical
+PR-0213,2B-0184,INV-2604-00213,V025,23EANLL0258A1ZB,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B vendor_name rendered as 'M/s Crestline Textiles India Pvt. Ltd.'
+PR-0214,2B-0072,INV-2604-00214,V022,27CBGHX9945C1ZJ,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,50272.05,false,true,frozen_test,PR CGST/SGST under state 27; 2B IGST under state 23; total tax equal
+PR-0215,2B-0151,INV-2604-00215,V008,33DBDFF6066I1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1025.00,false,,calibration,all comparison fields identical
+PR-0216,,INV-2604-00216,V009,06ZUWQL5692X1Z7,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,54891.06,false,true,frozen_test,absent from current 2B and from the prior-period snapshot
+PR-0217,2B-0165,INV-2604-00217,V001,27HPBHZ2966J1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,all comparison fields identical
+PR-0218,2B-0213,INV-2604-00218,V040,10RCYAZ9838E1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,22886.35,false,,calibration,all comparison fields identical
+PR-0219,,INV-2604-00219,V040,10RCYAZ9838E1Z7,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,22886.35,false,true,frozen_test,absent from current 2B and from the prior-period snapshot
+PR-0220,2B-0434,INV-2604-00220,V037,27DDBTQ1492W1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,42652.92,false,,calibration,all comparison fields identical
+PR-0221,2B-0023,INV-2604-00221,V037,27DDBTQ1492W1ZA,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,42652.92,false,,frozen_test,2B invoice_date shifted by +1 day(s)
+PR-0222,2B-0351,INV-2604-00222,V040,10RCYAZ9838E1Z7,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,22886.35,false,,calibration,"2B vendor_name OCR-corrupted to 'Crest1ine ,Traders and C0mpany'"
+PR-0223,2B-0087,INV-2604-00223,V004,22JLIUB3888G1ZO,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0224,2B-0100,INV-2604-00224,V014,01KPAMG7469R1ZE,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0225,2B-0195,INV-2604-00225,V016,27NNHOE5359S1ZX,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,176.08,false,true,calibration,PR CGST/SGST under state 27; 2B IGST under state 22; total tax equal
+PR-0226,2B-0447,INV-2604-00226,V029,29NKVKQ5588B1Z9,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-5000.00,5000.00,false,1328.86,false,true,calibration,2B net of credit note Rs.5000.00
+PR-0227,2B-0392,INV-2604-00227,V035,06WWDLC2591N1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1400.00,false,,frozen_test,all comparison fields identical
+PR-0228,2B-0180,INV-2604-00228,V024,24WIIYL3578T1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0229,2B-0395,INV-2604-00229,V035,06WWDLC2591N1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1400.00,false,,calibration,all comparison fields identical
+PR-0230,,INV-2604-00230,V022,27CBGHX9945C1ZJ,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,50272.05,false,false,frozen_test,"present in prior-period snapshot, absent from current 2B"
+PR-0231,2B-0189,INV-2604-00231,V013,10CLWJW0153B1ZL,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-3379.66,,false,103578.27,true,true,frozen_test,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0232,2B-0114,INV-2604-00232,V038,02CTMNE5571B1Z6,quarantine_missing_field,invalid_input,quarantined,missing_required_field,,quarantine,0.00,,false,125710.64,true,,calibration,all of cgst/sgst/igst blank
+PR-0233,2B-0148,INV-2604-00233,V006,27MGAGX0940T1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,28774.39,false,,calibration,all comparison fields identical
+PR-0234,2B-0182,INV-2604-00234,V020,08PAPRB6119M1ZV,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-4469.98,,false,804.60,false,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0235,2B-0053,INV-2604-00235,V019,32LHGYK3148I1ZP,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0236,2B-0069,INV-2604-00236,V006,27MGAGX0940T1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,28774.39,false,,calibration,all comparison fields identical
+PR-0237,2B-0258,INV-2604-00237,V005,37AKHBP5432H1ZS,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,220.28,false,,calibration,2B vendor_name OCR-corrupted to 'Konark 1ndustries and C0mpany ;'
+PR-0238,2B-0024,INV-2604-00238,V015,09RUTFG7986V1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,71790.02,false,,calibration,all comparison fields identical
+PR-0239,2B-0152,INV-2604-00239,V028,21SKPXR4660P1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0240,2B-0400,INV-2604-00240,V018,08STSKE2455Y1ZA,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,0.25,,false,115774.46,true,,calibration,taxable_value differs by Rs.0.25 (within Rs.1)
+PR-0241,2B-0085,INV-2604-00241,V028,21SKPXR4660P1ZJ,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,0.99,,false,0.00,false,,calibration,taxable_value differs by Rs.0.99 (within Rs.1)
+PR-0242,2B-0048,INV-2604-00242,V038,02CTMNE5571B1Z6,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,125710.64,true,,frozen_test,all comparison fields identical
+PR-0243,2B-0397,INV-2604-00243,V033,03KJOEN7911O1Z1,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,124952.52,true,,calibration,all comparison fields identical
+PR-0244,2B-0472,INV-2604-00244,V035,06WWDLC2591N1Z0,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,-0.06,,false,1400.00,false,,calibration,taxable_value differs by Rs.0.06 (within Rs.1)
+PR-0245,2B-0450,INV-2604-00245,V020,08PAPRB6119M1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,804.60,false,,frozen_test,all comparison fields identical
+PR-0246,2B-0431,INV-2604-00246,V028,21SKPXR4660P1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0247,2B-0469,INV-2604-00247,V039,02LJWUK8178Q1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,11338.70,false,,frozen_test,all comparison fields identical
+PR-0248,2B-0446,INV-2604-00248,V015,09RUTFG7986V1ZZ,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-3045.62,,false,71790.02,false,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0249,2B-0153,INV-2604-00249,V034,32MWNUU2669X1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0250,2B-0486,INV-2604-00250,V011,27ZNNUA5329D1Z8,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-38209.00,38209.00,false,113979.29,true,true,calibration,2B net of credit note Rs.38209.00
+PR-0251,2B-0104,INV-2604-00251,V030,03RFLNG9701F1ZD,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-5023.82,,false,164457.37,true,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0252,2B-0194,INV-2604-00252,V024,24WIIYL3578T1Z9,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B invoice_date shifted by -2 day(s)
+PR-0253,2B-0102,INV-2604-00253,V019,32LHGYK3148I1ZP,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0254,2B-0046,INV-2604-00254,V035,06WWDLC2591N1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1400.00,false,,frozen_test,all comparison fields identical
+PR-0255,2B-0063,INV-2604-00255,V031,27GFTDT0664D1ZM,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,8396.10,false,false,calibration,PR CGST/SGST under state 27; 2B IGST under state 33; total tax equal
+PR-0256,2B-0440,INV-2604-00256,V021,27YIYXG2138V1Z2,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-5000.00,5000.00,false,111231.08,true,false,frozen_test,2B net of credit note Rs.5000.00
+PR-0257,2B-0049,INV-2604-00257,V031,27GFTDT0664D1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,8396.10,false,,calibration,all comparison fields identical
+PR-0258,2B-0342,INV-2604-00258,V020,08PAPRB6119M1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,804.60,false,,frozen_test,all comparison fields identical
+PR-0259,2B-0120,INV-2604-00259,V032,27AVGFB0339Q1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1781.30,false,,calibration,all comparison fields identical
+PR-0260,2B-0018,INV-2604-00260,V007,27NFAOH7689K1ZL,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,79774.05,true,,calibration,all comparison fields identical
+PR-0261,2B-0149,INV-2604-00261,V010,24MMKOP2707A1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,12535.93,false,,frozen_test,all comparison fields identical
+PR-0262,2B-0132,INV-2604-00262,V033,03KJOEN7911O1Z1,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,124952.52,true,,frozen_test,all comparison fields identical
+PR-0263,2B-0412,INV-2604-00263,V009,06ZUWQL5692X1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,54891.06,false,,frozen_test,all comparison fields identical
+PR-0264,2B-0316,INV-2604-00264,V022,27CBGHX9945C1ZJ,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-10000.00,10000.00,false,50272.05,false,true,calibration,2B net of credit note Rs.10000.00
+PR-0265,2B-0099,INV-2604-00265,V034,32MWNUU2669X1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0266,,INV-2604-00266,V002,27NOMNQ8836X1Z2,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,82859.47,true,false,calibration,absent from current 2B and from the prior-period snapshot
+PR-0267,2B-0073,INV-2604-00267,V038,02CTMNE5571B1Z6,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,125710.64,true,,calibration,all comparison fields identical
+PR-0268,2B-0275,INV-2604-00268,V026,27VGUPQ1274N1ZX,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,0.00,false,true,calibration,PR CGST/SGST under state 27; 2B IGST under state 24; total tax equal
+PR-0269,2B-0230,INV-2604-00269,V017,27ITFXL3590N1ZG,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,40727.16,false,,calibration,all comparison fields identical
+PR-0270,2B-0025,INV-2604-00270,V007,27NFAOH7689K1ZL,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,79774.05,true,,calibration,all comparison fields identical
+PR-0271,2B-0451,INV-2604-00271,V003,32EVDGL6232O1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0272,2B-0401,INV-2604-00272,V024,24WIIYL3578T1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0273,2B-0103,INV-2604-00273,V015,09RUTFG7986V1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,71790.02,false,,calibration,all comparison fields identical
+PR-0274,2B-0358,INV-2604-00274,V022,27CBGHX9945C1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,50272.05,false,,frozen_test,all comparison fields identical
+PR-0275,2B-0418,INV-2604-00275,V002,27NOMNQ8836X1Z2,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,82859.47,true,,calibration,2B vendor_name rendered as 'Himalaya Solutions India Pvt. Ltd..'
+PR-0276,2B-0164,INV-2604-00276,V040,10RCYAZ9838E1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,22886.35,false,,calibration,all comparison fields identical
+PR-0277,2B-0138,INV-2604-00277,V039,02LJWUK8178Q1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,11338.70,false,,calibration,all comparison fields identical
+PR-0278,,INV-2604-00278,V033,03KJOEN7911O1Z1,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,124952.52,true,false,frozen_test,absent from current 2B and from the prior-period snapshot
+PR-0279,,INV-2604-00279,V013,10CLWJW0153B1ZL,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,103578.27,true,false,frozen_test,"present in prior-period snapshot, absent from current 2B"
+PR-0280,2B-0411,INV-2604-00280,V028,21SKPXR4660P1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0281,2B-0448,INV-2604-00281,V038,02CTMNE5571B1Z6,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-1000.00,1000.00,false,125710.64,true,true,calibration,2B net of credit note Rs.1000.00
+PR-0282,2B-0307,INV-2604-00282,V023,32ZQZIP1711S1ZR,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-36621.00,36621.00,false,4744.52,false,false,frozen_test,2B net of credit note Rs.36621.00
+PR-0283,2B-0144,INV-2604-00283,V018,08STSKE2455Y1ZA,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,115774.46,true,,calibration,2B vendor_name OCR-corrupted to 'K0nark  Traders and C0mpany'
+PR-0284,2B-0373,INV-2604-00284,V004,22JLIUB3888G1ZO,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,2B invoice_date shifted by +2 day(s)
+PR-0285,2B-0007,INV-2604-00285,V037,27DDBTQ1492W1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,42652.92,false,,calibration,all comparison fields identical
+PR-0286,2B-0452,INV-2604-00286,V035,06WWDLC2591N1Z0,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,1400.00,false,,frozen_test,2B vendor_name rendered as 'Orbit Chemicals India Pvt. Ltd..'
+PR-0287,,INV-2604-00287,V030,03RFLNG9701F1ZD,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,164457.37,true,false,calibration,"present in prior-period snapshot, absent from current 2B"
+PR-0288,2B-0331,INV-2604-00288,V002,27NOMNQ8836X1Z2,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,82859.47,true,,calibration,all comparison fields identical
+PR-0289,2B-0160,INV-2604-00289,V006,27MGAGX0940T1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,28774.39,false,,calibration,all comparison fields identical
+PR-0290,2B-0335,INV-2604-00290,V034,32MWNUU2669X1ZI,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B vendor_name OCR-corrupted to 'Dynam0  Texti1es Private Limited'
+PR-0291,,INV-2604-00291,V018,08STSKE2455Y1ZA,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,115774.46,true,false,calibration,"present in prior-period snapshot, absent from current 2B"
+PR-0292,2B-0257,INV-2604-00292,V026,27VGUPQ1274N1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0293,,INV-2604-00293,V015,09RUTFG7986V1ZZ,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,71790.02,false,false,calibration,absent from current 2B and from the prior-period snapshot
+PR-0294,2B-0266,INV-2604-00294,V030,03RFLNG9701F1ZD,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-516.45,,false,164457.37,true,false,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0295,2B-0133,INV-2604-00295,V014,01KPAMG7469R1ZE,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0296,2B-0243,INV-2604-00296,V028,21SKPXR4660P1ZJ,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,-0.26,,false,0.00,false,,calibration,taxable_value differs by Rs.0.26 (within Rs.1)
+PR-0297,2B-0349,INV-2604-00297,V015,09RUTFG7986V1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,71790.02,false,,calibration,all comparison fields identical
+PR-0298,2B-0270,INV-2604-00298,V015,09RUTFG7986V1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,71790.02,false,,calibration,all comparison fields identical
+PR-0299,2B-0475,INV-2604-00299,V016,27NNHOE5359S1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,176.08,false,,calibration,all comparison fields identical
+PR-0300,2B-0372,INV-2604-00300,V003,32EVDGL6232O1ZV,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B vendor_name rendered as 'Bharat  Solutions  Ltd.'
+PR-0301,2B-0071,INV-2604-00301,V026,27VGUPQ1274N1ZX,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B vendor_name rendered as 'M/s Wavelength Ent. LLP'
+PR-0302,2B-0070,INV-2604-00302,V019,32LHGYK3148I1ZP,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0303,2B-0317,INV-2604-00303,V018,08STSKE2455Y1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,115774.46,true,,frozen_test,all comparison fields identical
+PR-0304,2B-0346,INV-2604-00304,V011,27ZNNUA5329D1Z8,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,113979.29,true,,calibration,all comparison fields identical
+PR-0305,2B-0468,INV-2604-00305,V004,22JLIUB3888G1ZO,quarantine_missing_field,invalid_input,quarantined,missing_required_field,,quarantine,0.00,,false,0.00,false,,calibration,invoice_date blank
+PR-0306,2B-0143,INV-2604-00306,V004,22JLIUB3888G1ZO,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0307,2B-0207,INV-2604-00307,V020,08PAPRB6119M1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,804.60,false,,frozen_test,all comparison fields identical
+PR-0308,2B-0139,INV-2604-00308,V039,02LJWUK8178Q1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,11338.70,false,,calibration,all comparison fields identical
+PR-0309,2B-0150,INV-2604-00309,V033,03KJOEN7911O1Z1,quarantine_missing_field,invalid_input,quarantined,missing_required_field,,quarantine,0.00,,false,124952.52,true,,frozen_test,taxable_value blank
+PR-0310,2B-0037,INV-2604-00310,V029,29NKVKQ5588B1Z9,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-2500.00,2500.00,false,1328.86,false,false,calibration,2B net of credit note Rs.2500.00
+PR-0311,2B-0479,INV-2604-00311,V035,06WWDLC2591N1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1400.00,false,,calibration,all comparison fields identical
+PR-0312,2B-0155,INV-2604-00312,V018,08STSKE2455Y1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,115774.46,true,,calibration,all comparison fields identical
+PR-0313,2B-0429,INV-2604-00313,V031,27GFTDT0664D1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,8396.10,false,,calibration,all comparison fields identical
+PR-0314,2B-0366,INV-2604-00314,V012,27WOIJO2003E1Z3,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,47331.39,false,,calibration,all comparison fields identical
+PR-0315,,INV-2604-00315,V039,02LJWUK8178Q1ZJ,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,11338.70,false,true,calibration,absent from current 2B and from the prior-period snapshot
+PR-0316,2B-0410,INV-2604-00316,V007,27NFAOH7689K1ZL,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,79774.05,true,,calibration,all comparison fields identical
+PR-0317,2B-0141,INV-2604-00317,V013,10CLWJW0153B1ZL,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-2693.10,,false,103578.27,true,false,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0318,2B-0315,INV-2604-00318,V026,27VGUPQ1274N1ZX,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,0.00,false,true,calibration,PR CGST/SGST under state 27; 2B IGST under state 24; total tax equal
+PR-0319,,INV-2604-00319,V018,08STSKE2455Y1ZA,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,115774.46,true,true,calibration,"present in prior-period snapshot, absent from current 2B"
+PR-0320,2B-0357,INV-2604-00320,V012,27WOIJO2003E1Z3,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,47331.39,false,,frozen_test,all comparison fields identical
+PR-0321,,INV-2604-00321,V010,24MMKOP2707A1Z7,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,12535.93,false,true,calibration,absent from current 2B and from the prior-period snapshot
+PR-0322,2B-0393,INV-2604-00322,V001,27HPBHZ2966J1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,all comparison fields identical
+PR-0323,2B-0113,INV-2604-00323,V005,37AKHBP5432H1ZS,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,220.28,false,,calibration,all comparison fields identical
+PR-0324,2B-0129,INV-2604-00324,V014,01KPAMG7469R1ZE,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B vendor_name rendered as 'Elmwood  Fabricators  LLP'
+PR-0325,2B-0457,INV-2604-00325,V018,08STSKE2455Y1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,115774.46,true,,calibration,all comparison fields identical
+PR-0326,2B-0076,INV-2604-00326,V002,27NOMNQ8836X1Z2,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,82859.47,true,,calibration,all comparison fields identical
+PR-0327,2B-0433,INV-2604-00327,V001,27HPBHZ2966J1ZI,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-1000.00,1000.00,false,141109.19,true,true,calibration,2B net of credit note Rs.1000.00
+PR-0328,2B-0137,INV-2604-00328,V001,27HPBHZ2966J1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,all comparison fields identical
+PR-0329,2B-0080,INV-2604-00329,V036,27GFSXR6677W1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,148917.54,true,,calibration,all comparison fields identical
+PR-0330,2B-0338,INV-2604-00330,V027,27BBEVF0062J1ZM,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,55586.43,false,true,calibration,PR CGST/SGST under state 27; 2B IGST under state 33; total tax equal
+PR-0331,2B-0011,INV-2604-00331,V017,27ITFXL3590N1ZG,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,40727.16,false,,frozen_test,2B invoice_date shifted by +2 day(s)
+PR-0332,2B-0462,INV-2604-00332,V033,03KJOEN7911O1Z1,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,124952.52,true,,calibration,all comparison fields identical
+PR-0333,2B-0247,INV-2604-00333,V006,27MGAGX0940T1ZV,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,28774.39,false,,frozen_test,2B vendor_name rendered as 'BHARAT ENTERPRISES INDIA PVT. LTD.'
+PR-0334,2B-0383,INV-2604-00334,V017,27ITFXL3590N1ZG,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,40727.16,false,false,calibration,PR CGST/SGST under state 27; 2B IGST under state 06; total tax equal
+PR-0335,2B-0354,INV-2604-00335,V023,32ZQZIP1711S1ZR,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,4744.52,false,,calibration,all comparison fields identical
+PR-0336,2B-0145,INV-2604-00336,V037,27DDBTQ1492W1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,42652.92,false,,calibration,all comparison fields identical
+PR-0337,2B-0044,INV-2604-00337,V027,27BBEVF0062J1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,55586.43,false,,frozen_test,all comparison fields identical
+PR-0338,2B-0190,INV-2604-00338,V034,32MWNUU2669X1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0339,2B-0443,INV-2604-00339,V021,27YIYXG2138V1Z2,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,-0.12,,false,111231.08,true,,frozen_test,taxable_value differs by Rs.0.12 (within Rs.1)
+PR-0340,2B-0227,INV-2604-00340,V035,06WWDLC2591N1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1400.00,false,,calibration,all comparison fields identical
+PR-0341,2B-0030,INV-2604-00341,V025,23EANLL0258A1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0342,2B-0054,INV-2604-00342,V032,27AVGFB0339Q1ZZ,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,1781.30,false,,frozen_test,2B vendor_name rendered as 'Trident  Packaging  &  Co.'
+PR-0343,2B-0488,INV-2604-00343,V030,03RFLNG9701F1ZD,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,164457.37,true,,frozen_test,all comparison fields identical
+PR-0344,2B-0380,INV-2604-00344,V016,27NNHOE5359S1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,176.08,false,,calibration,all comparison fields identical
+PR-0345,2B-0064,INV-2604-00345,V018,08STSKE2455Y1ZA,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,115774.46,true,,calibration,2B vendor_name rendered as 'KONARK TRADERS & CO.'
+PR-0346,2B-0118,INV-2604-00346,V001,27HPBHZ2966J1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,141109.19,true,,frozen_test,all comparison fields identical
+PR-0347,2B-0235,INV-2604-00347,V017,27ITFXL3590N1ZG,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,40727.16,false,true,calibration,PR CGST/SGST under state 27; 2B IGST under state 10; total tax equal
+PR-0348,2B-0022,INV-2604-00348,V028,21SKPXR4660P1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0349,2B-0008,INV-2604-00349,V040,10RCYAZ9838E1Z7,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-39236.00,39236.00,false,22886.35,false,true,calibration,2B net of credit note Rs.39236.00
+PR-0350,2B-0061,INV-2604-00350,V032,27AVGFB0339Q1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1781.30,false,,calibration,all comparison fields identical
+PR-0351,2B-0041,INV-2604-00351,V006,27MGAGX0940T1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,28774.39,false,,frozen_test,all comparison fields identical
+PR-0352,2B-0487,INV-2604-00352,V007,27NFAOH7689K1ZL,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,79774.05,true,,frozen_test,all comparison fields identical
+PR-0353,2B-0199,INV-2604-00353,V002,27NOMNQ8836X1Z2,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,82859.47,true,,calibration,all comparison fields identical
+PR-0354,2B-0368,INV-2604-00354,V023,32ZQZIP1711S1ZR,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,4744.52,false,,frozen_test,all comparison fields identical
+PR-0355,2B-0170,INV-2604-00355,V014,01KPAMG7469R1ZE,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B vendor_name rendered as 'Elmwood  Fabricators  LLP'
+PR-0356,2B-0471,INV-2604-00356,V039,02LJWUK8178Q1ZJ,quarantine_bad_gstin,invalid_input,quarantined,invalid_gstin_format,,quarantine,0.00,,false,11338.70,false,,calibration,gstin check digit incorrect
+PR-0357,2B-0461,INV-2604-00357,V037,27DDBTQ1492W1ZA,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,42652.92,false,true,calibration,PR CGST/SGST under state 27; 2B IGST under state 19; total tax equal
+PR-0358,2B-0083,INV-2604-00358,V017,27ITFXL3590N1ZG,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-10000.00,10000.00,false,40727.16,false,true,calibration,2B net of credit note Rs.10000.00
+PR-0359,2B-0112,INV-2604-00359,V026,27VGUPQ1274N1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0360,2B-0268,INV-2604-00360,V018,08STSKE2455Y1ZA,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-10000.00,10000.00,false,115774.46,true,true,frozen_test,2B net of credit note Rs.10000.00
+PR-0361,2B-0328,INV-2604-00361,V028,21SKPXR4660P1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0362,2B-0327,INV-2604-00362,V016,27NNHOE5359S1ZX,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,176.08,false,,calibration,2B invoice_date shifted by +1 day(s)
+PR-0363,2B-0325,INV-2604-00363,V001,27HPBHZ2966J1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,all comparison fields identical
+PR-0364,2B-0134,INV-2604-00364,V023,32ZQZIP1711S1ZR,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,4744.52,false,,calibration,all comparison fields identical
+PR-0365,2B-0254,INV-2604-00365,V015,09RUTFG7986V1ZZ,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,71790.02,false,,calibration,2B vendor_name rendered as 'Narmada Agro Ltd..'
+PR-0366,2B-0279,INV-2604-00366,V013,10CLWJW0153B1ZL,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,103578.27,true,,calibration,"2B vendor_name OCR-corrupted to 'Jy0ti ,Agr0 LLP'"
+PR-0367,2B-0265,INV-2604-00367,V019,32LHGYK3148I1ZP,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,2B vendor_name rendered as 'M/s Everest Textiles Ltd.'
+PR-0368,2B-0288,INV-2604-00368,V006,27MGAGX0940T1ZV,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,-0.44,,false,28774.39,false,,frozen_test,taxable_value differs by Rs.0.44 (within Rs.1)
+PR-0369,2B-0364,INV-2604-00369,V017,27ITFXL3590N1ZG,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,40727.16,false,,frozen_test,all comparison fields identical
+PR-0370,2B-0444,INV-2604-00370,V022,27CBGHX9945C1ZJ,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,50272.05,false,true,calibration,PR CGST/SGST under state 27; 2B IGST under state 21; total tax equal
+PR-0371,2B-0282,INV-2604-00371,V017,27ITFXL3590N1ZG,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,40727.16,false,,frozen_test,all comparison fields identical
+PR-0372,2B-0241,INV-2604-00372,V023,32ZQZIP1711S1ZR,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,4744.52,false,,calibration,all comparison fields identical
+PR-0373,2B-0485,INV-2604-00373,V035,06WWDLC2591N1Z0,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-5000.00,5000.00,false,1400.00,false,true,calibration,2B net of credit note Rs.5000.00
+PR-0374,2B-0252,INV-2604-00374,V003,32EVDGL6232O1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0375,2B-0130,INV-2604-00375,V035,06WWDLC2591N1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1400.00,false,,frozen_test,all comparison fields identical
+PR-0376,2B-0365,INV-2604-00376,V017,27ITFXL3590N1ZG,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-2500.00,2500.00,false,40727.16,false,false,calibration,2B net of credit note Rs.2500.00
+PR-0377,2B-0109,INV-2604-00377,V015,09RUTFG7986V1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,71790.02,false,,calibration,all comparison fields identical
+PR-0378,2B-0439,INV-2604-00378,V032,27AVGFB0339Q1ZZ,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-2500.00,2500.00,false,1781.30,false,true,frozen_test,2B net of credit note Rs.2500.00
+PR-0379,,INV-2604-00379,V036,27GFSXR6677W1Z0,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,148917.54,true,true,frozen_test,absent from current 2B and from the prior-period snapshot
+PR-0380,2B-0391,INV-2604-00380,V025,23EANLL0258A1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0381,,INV-2604-00381,V012,27WOIJO2003E1Z3,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,47331.39,false,false,calibration,absent from current 2B and from the prior-period snapshot
+PR-0382,2B-0414,INV-2604-00382,V003,32EVDGL6232O1ZV,quarantine_missing_field,invalid_input,quarantined,missing_required_field,,quarantine,0.00,,false,0.00,false,,calibration,vendor_gstin blank
+PR-0383,2B-0250,INV-2604-00383,V005,37AKHBP5432H1ZS,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,220.28,false,,calibration,all comparison fields identical
+PR-0384,2B-0108,INV-2604-00384,V038,02CTMNE5571B1Z6,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,125710.64,true,,calibration,all comparison fields identical
+PR-0385,,INV-2604-00385,V009,06ZUWQL5692X1Z7,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,54891.06,false,false,calibration,absent from current 2B and from the prior-period snapshot
+PR-0386,2B-0304,INV-2604-00386,V040,10RCYAZ9838E1Z7,quarantine_bad_gstin,invalid_input,quarantined,invalid_gstin_format,,quarantine,0.00,,false,22886.35,false,,frozen_test,gstin PAN block has digits where letters are required
+PR-0387,2B-0426,INV-2604-00387,V015,09RUTFG7986V1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,71790.02,false,,frozen_test,all comparison fields identical
+PR-0388,2B-0167,INV-2604-00388,V040,10RCYAZ9838E1Z7,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,22886.35,false,,calibration,2B invoice_date shifted by +2 day(s)
+PR-0389,2B-0430,INV-2604-00389,V007,27NFAOH7689K1ZL,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,79774.05,true,,calibration,2B vendor_name rendered as 'ZENITH INDUSTRIES INDIA PVT. LTD.'
+PR-0390,,INV-2604-00390,V030,03RFLNG9701F1ZD,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,164457.37,true,true,calibration,absent from current 2B and from the prior-period snapshot
+PR-0391,2B-0210,INV-2604-00391,V011,27ZNNUA5329D1Z8,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,113979.29,true,false,calibration,PR CGST/SGST under state 27; 2B IGST under state 29; total tax equal
+PR-0392,2B-0161,INV-2604-00392,V030,03RFLNG9701F1ZD,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,164457.37,true,,calibration,2B vendor_name rendered as 'Arcadia  Packaging  India  Pvt.  Ltd.'
+PR-0393,2B-0029,INV-2604-00393,V039,02LJWUK8178Q1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,11338.70,false,,frozen_test,all comparison fields identical
+PR-0394,,INV-2604-00394,V033,03KJOEN7911O1Z1,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,124952.52,true,true,calibration,"present in prior-period snapshot, absent from current 2B"
+PR-0395,2B-0248,INV-2604-00395,V026,27VGUPQ1274N1ZX,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,0.00,false,true,calibration,PR CGST/SGST under state 27; 2B IGST under state 29; total tax equal
+PR-0396,2B-0110,INV-2604-00396,V037,27DDBTQ1492W1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,42652.92,false,,frozen_test,all comparison fields identical
+PR-0397,,INV-2604-00397,V013,10CLWJW0153B1ZL,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,103578.27,true,false,frozen_test,absent from current 2B and from the prior-period snapshot
+PR-0398,2B-0231,INV-2604-00398,V033,03KJOEN7911O1Z1,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,124952.52,true,,frozen_test,all comparison fields identical
+PR-0399,2B-0222,INV-2604-00399,V006,27MGAGX0940T1ZV,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,28774.39,false,,calibration,2B vendor_name rendered as 'M/s Bharat Enterprises India Pvt. Ltd.'
+PR-0400,2B-0417,INV-2604-00400,V016,27NNHOE5359S1ZX,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,176.08,false,,calibration,2B vendor_name rendered as 'Meridian  Logistics  India  Pvt.  Ltd.'
+PR-0401,2B-0005,INV-2604-00401,V039,02LJWUK8178Q1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,11338.70,false,,frozen_test,all comparison fields identical
+PR-0402,2B-0098,INV-2604-00402,V028,21SKPXR4660P1ZJ,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B vendor_name OCR-corrupted to 'Hima1aya L0gistics Limited ;'
+PR-0403,2B-0050,INV-2604-00403,V016,27NNHOE5359S1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,176.08,false,,frozen_test,all comparison fields identical
+PR-0404,2B-0040,INV-2604-00404,V001,27HPBHZ2966J1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,all comparison fields identical
+PR-0405,2B-0341,INV-2604-00405,V039,02LJWUK8178Q1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,11338.70,false,,calibration,all comparison fields identical
+PR-0406,2B-0216,INV-2604-00406,V003,32EVDGL6232O1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0407,2B-0285,INV-2604-00407,V034,32MWNUU2669X1ZI,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B vendor_name rendered as 'DYNAMO TEXTILES PVT LTD'
+PR-0408,2B-0033,INV-2604-00408,V021,27YIYXG2138V1Z2,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,111231.08,true,,frozen_test,all comparison fields identical
+PR-0409,2B-0361,INV-2604-00409,V016,27NNHOE5359S1ZX,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,176.08,false,false,calibration,PR CGST/SGST under state 27; 2B IGST under state 09; total tax equal
+PR-0410,2B-0274,INV-2604-00410,V016,27NNHOE5359S1ZX,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,176.08,false,true,frozen_test,PR CGST/SGST under state 27; 2B IGST under state 01; total tax equal
+PR-0411,2B-0481,INV-2604-00411,V026,27VGUPQ1274N1ZX,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,2B vendor_name OCR-corrupted to 'Wave1ength  Enterprises LLP'
+PR-0412,2B-0298,INV-2604-00412,V006,27MGAGX0940T1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,28774.39,false,,calibration,all comparison fields identical
+PR-0413,2B-0168,INV-2604-00413,V028,21SKPXR4660P1ZJ,quarantine_bad_gstin,invalid_input,quarantined,invalid_gstin_format,,quarantine,0.00,,false,0.00,false,,calibration,gstin state-code prefix 40 does not exist
+PR-0414,2B-0126,INV-2604-00414,V024,24WIIYL3578T1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0415,2B-0264,INV-2604-00415,V016,27NNHOE5359S1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,176.08,false,,calibration,all comparison fields identical
+PR-0416,2B-0284,INV-2604-00416,V036,27GFSXR6677W1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,148917.54,true,,calibration,all comparison fields identical
+PR-0417,2B-0384,INV-2604-00417,V008,33DBDFF6066I1ZB,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-2500.00,2500.00,false,1025.00,false,true,calibration,2B net of credit note Rs.2500.00
+PR-0418,2B-0183,INV-2604-00418,V028,21SKPXR4660P1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0419,2B-0006,INV-2604-00419,V018,08STSKE2455Y1ZA,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,115774.46,true,,calibration,all comparison fields identical
+PR-0420,2B-0312,INV-2604-00420,V040,10RCYAZ9838E1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,22886.35,false,,calibration,all comparison fields identical
+PR-0421,2B-0259,INV-2604-00421,V016,27NNHOE5359S1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,176.08,false,,calibration,all comparison fields identical
+PR-0422,2B-0122,INV-2604-00422,V024,24WIIYL3578T1Z9,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B vendor_name rendered as 'FALCON LOGISTICS PVT LTD'
+PR-0423,2B-0095,INV-2604-00423,V024,24WIIYL3578T1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0424,2B-0339,INV-2604-00424,V001,27HPBHZ2966J1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,all comparison fields identical
+PR-0425,,INV-2604-00425,V007,27NFAOH7689K1ZL,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,79774.05,true,true,calibration,"present in prior-period snapshot, absent from current 2B"
+PR-0426,2B-0267,INV-2604-00426,V040,10RCYAZ9838E1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,22886.35,false,,calibration,all comparison fields identical
+PR-0427,2B-0226,INV-2604-00427,V014,01KPAMG7469R1ZE,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0428,2B-0038,INV-2604-00428,V028,21SKPXR4660P1ZJ,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,"2B vendor_name OCR-corrupted to 'Hima,1aya L0gistics Limited'"
+PR-0429,2B-0313,INV-2604-00429,V040,10RCYAZ9838E1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,22886.35,false,,frozen_test,all comparison fields identical
+PR-0430,2B-0297,INV-2604-00430,V025,23EANLL0258A1ZB,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B invoice_date shifted by +2 day(s)
+PR-0431,,INV-2604-00431,V007,27NFAOH7689K1ZL,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,79774.05,true,false,calibration,"present in prior-period snapshot, absent from current 2B"
+PR-0432,2B-0406,INV-2604-00432,V025,23EANLL0258A1ZB,fuzzy_date_tolerance,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,2B invoice_date shifted by +2 day(s)
+PR-0433,,INV-2604-00433,V031,27GFTDT0664D1ZM,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,8396.10,false,false,calibration,absent from current 2B and from the prior-period snapshot
+PR-0434,2B-0105,INV-2604-00434,V004,22JLIUB3888G1ZO,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,2B vendor_name rendered as 'M/s Wavelength Chemicals Ltd.'
+PR-0435,2B-0009,INV-2604-00435,V013,10CLWJW0153B1ZL,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,103578.27,true,,frozen_test,2B vendor_name rendered as 'M/s Jyoti Agro LLP'
+PR-0436,2B-0158,INV-2604-00436,V039,02LJWUK8178Q1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,11338.70,false,,calibration,all comparison fields identical
+PR-0437,,INV-2604-00437,V040,10RCYAZ9838E1Z7,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,22886.35,false,false,calibration,absent from current 2B and from the prior-period snapshot
+PR-0438,2B-0016,INV-2604-00438,V010,24MMKOP2707A1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,12535.93,false,,calibration,all comparison fields identical
+PR-0439,2B-0404,INV-2604-00439,V024,24WIIYL3578T1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0440,2B-0329,INV-2604-00440,V033,03KJOEN7911O1Z1,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-1323.13,,false,124952.52,true,true,frozen_test,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0441,2B-0369,INV-2604-00441,V024,24WIIYL3578T1Z9,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0442,,INV-2604-00442,V006,27MGAGX0940T1ZV,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,28774.39,false,false,calibration,"present in prior-period snapshot, absent from current 2B"
+PR-0443,2B-0286,INV-2604-00443,V021,27YIYXG2138V1Z2,gstin_header_mismatch,classification_exception,rule_classified,,gstin_header_mismatch,classified_exception,0.00,,false,111231.08,true,false,calibration,PR CGST/SGST under state 27; 2B IGST under state 37; total tax equal
+PR-0444,2B-0028,INV-2604-00444,V005,37AKHBP5432H1ZS,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,220.28,false,,calibration,all comparison fields identical
+PR-0445,2B-0219,INV-2604-00445,V002,27NOMNQ8836X1Z2,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-5000.00,5000.00,false,82859.47,true,false,calibration,2B net of credit note Rs.5000.00
+PR-0446,2B-0101,INV-2604-00446,V025,23EANLL0258A1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0447,2B-0271,INV-2604-00447,V023,32ZQZIP1711S1ZR,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,4744.52,false,,frozen_test,all comparison fields identical
+PR-0448,2B-0223,INV-2604-00448,V029,29NKVKQ5588B1Z9,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-2960.22,,false,1328.86,false,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0449,,INV-2604-00449,V039,02LJWUK8178Q1ZJ,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,11338.70,false,false,calibration,absent from current 2B and from the prior-period snapshot
+PR-0450,2B-0405,INV-2604-00450,V023,32ZQZIP1711S1ZR,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,4744.52,false,,calibration,all comparison fields identical
+PR-0451,2B-0456,INV-2604-00451,V017,27ITFXL3590N1ZG,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,40727.16,false,,calibration,2B vendor_name rendered as 'GANGA ENTERPRISES INDIA PVT. LTD.'
+PR-0452,2B-0352,INV-2604-00452,V035,06WWDLC2591N1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1400.00,false,,calibration,all comparison fields identical
+PR-0453,2B-0135,INV-2604-00453,V033,03KJOEN7911O1Z1,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-8350.29,,false,124952.52,true,true,calibration,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0454,2B-0308,INV-2604-00454,V011,27ZNNUA5329D1Z8,quarantine_bad_date,invalid_input,quarantined,unparseable_or_implausible_date,,quarantine,0.00,,false,113979.29,true,,calibration,invoice_date 'not-a-date' unparseable or implausible
+PR-0455,2B-0166,INV-2604-00455,V010,24MMKOP2707A1Z7,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,12535.93,false,,frozen_test,all comparison fields identical
+PR-0456,2B-0398,INV-2604-00456,V004,22JLIUB3888G1ZO,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0457,,INV-2604-00457,V027,27BBEVF0062J1ZM,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,55586.43,false,true,calibration,absent from current 2B and from the prior-period snapshot
+PR-0458,2B-0438,INV-2604-00458,V003,32EVDGL6232O1ZV,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,0.34,,false,0.00,false,,calibration,taxable_value differs by Rs.0.34 (within Rs.1)
+PR-0459,2B-0237,INV-2604-00459,V039,02LJWUK8178Q1ZJ,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,11338.70,false,,calibration,"2B vendor_name OCR-corrupted to 'Yamuna Traders Limi,ted'"
+PR-0460,2B-0056,INV-2604-00460,V001,27HPBHZ2966J1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,all comparison fields identical
+PR-0461,2B-0277,INV-2604-00461,V018,08STSKE2455Y1ZA,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,115774.46,true,,calibration,2B vendor_name rendered as 'KONARK TRADERS & CO.'
+PR-0462,2B-0196,INV-2604-00462,V001,27HPBHZ2966J1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,141109.19,true,,calibration,all comparison fields identical
+PR-0463,2B-0428,INV-2604-00463,V029,29NKVKQ5588B1Z9,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,1328.86,false,,calibration,2B vendor_name rendered as 'Wavelength Fabricators Pvt Ltd.'
+PR-0464,2B-0245,INV-2604-00464,V026,27VGUPQ1274N1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,frozen_test,all comparison fields identical
+PR-0465,2B-0115,INV-2604-00465,V021,27YIYXG2138V1Z2,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,111231.08,true,,calibration,all comparison fields identical
+PR-0466,2B-0176,INV-2604-00466,V028,21SKPXR4660P1ZJ,quarantine_bad_gstin,invalid_input,quarantined,invalid_gstin_format,,quarantine,0.00,,false,0.00,false,,frozen_test,gstin truncated to 14 characters
+PR-0467,,INV-2604-00467,V001,27HPBHZ2966J1ZI,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,141109.19,true,true,calibration,absent from current 2B and from the prior-period snapshot
+PR-0468,2B-0381,INV-2604-00468,V036,27GFSXR6677W1Z0,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,148917.54,true,,calibration,2B vendor_name rendered as 'Meridian  Fabricators  &  Co.'
+PR-0469,2B-0154,INV-2604-00469,V008,33DBDFF6066I1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1025.00,false,,calibration,all comparison fields identical
+PR-0470,2B-0211,INV-2604-00470,V039,02LJWUK8178Q1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,11338.70,false,,calibration,all comparison fields identical
+PR-0471,2B-0463,INV-2604-00471,V006,27MGAGX0940T1ZV,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-3096.93,,false,28774.39,false,true,frozen_test,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0472,2B-0047,INV-2604-00472,V009,06ZUWQL5692X1Z7,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,54891.06,false,,frozen_test,2B vendor_name rendered as 'Bharat  Steel  &  Co.'
+PR-0473,2B-0251,INV-2604-00473,V023,32ZQZIP1711S1ZR,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,4744.52,false,,calibration,all comparison fields identical
+PR-0474,2B-0419,INV-2604-00474,V002,27NOMNQ8836X1Z2,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,82859.47,true,,frozen_test,all comparison fields identical
+PR-0475,2B-0212,INV-2604-00475,V014,01KPAMG7469R1ZE,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0476,2B-0344,INV-2604-00476,V031,27GFTDT0664D1ZM,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,8396.10,false,,calibration,2B vendor_name rendered as 'M/s Bharat Textiles Ltd.'
+PR-0477,,INV-2604-00477,V038,02CTMNE5571B1Z6,invoice_removed_post_claim,absence,none,,invoice_removed_post_claim,classified_exception,0.00,,true,125710.64,true,true,frozen_test,"present in prior-period snapshot, absent from current 2B"
+PR-0478,2B-0272,INV-2604-00478,V008,33DBDFF6066I1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1025.00,false,,calibration,all comparison fields identical
+PR-0479,2B-0420,INV-2604-00479,V005,37AKHBP5432H1ZS,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,220.28,false,,frozen_test,all comparison fields identical
+PR-0480,2B-0012,INV-2604-00480,V004,22JLIUB3888G1ZO,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0481,,INV-2604-00481,V015,09RUTFG7986V1ZZ,late_filed_supplier,absence,none,,late_filed_supplier,classified_exception,0.00,,false,71790.02,false,false,calibration,absent from current 2B and from the prior-period snapshot
+PR-0482,2B-0260,INV-2604-00482,V003,32EVDGL6232O1ZV,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,0.00,false,,calibration,"2B vendor_name OCR-corrupted to 'Bharat S01,utions Limited'"
+PR-0483,2B-0355,INV-2604-00483,V031,27GFTDT0664D1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,8396.10,false,,calibration,all comparison fields identical
+PR-0484,2B-0003,INV-2604-00484,V034,32MWNUU2669X1ZI,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0485,2B-0350,INV-2604-00485,V035,06WWDLC2591N1Z0,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1400.00,false,,frozen_test,all comparison fields identical
+PR-0486,2B-0305,INV-2604-00486,V016,27NNHOE5359S1ZX,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,176.08,false,,calibration,all comparison fields identical
+PR-0487,2B-0334,INV-2604-00487,V015,09RUTFG7986V1ZZ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,71790.02,false,,calibration,all comparison fields identical
+PR-0488,2B-0096,INV-2604-00488,V003,32EVDGL6232O1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,0.00,false,,calibration,all comparison fields identical
+PR-0489,2B-0386,INV-2604-00489,V020,08PAPRB6119M1ZV,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,804.60,false,,calibration,all comparison fields identical
+PR-0490,2B-0477,INV-2604-00490,V010,24MMKOP2707A1Z7,indeterminate_ambiguous,ambiguous,fuzzy,,,indeterminate,-7870.37,,false,12535.93,false,false,frozen_test,"invoice number garbled, date beyond tolerance, non-round amount delta - no rule fires confidently"
+PR-0491,2B-0093,INV-2604-00491,V002,27NOMNQ8836X1Z2,quarantine_bad_amount,invalid_input,quarantined,non_numeric_or_negative_amount,,quarantine,0.00,,false,82859.47,true,,frozen_test,taxable_value negative
+PR-0492,2B-0013,INV-2604-00492,V033,03KJOEN7911O1Z1,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,124952.52,true,,frozen_test,all comparison fields identical
+PR-0493,2B-0014,INV-2604-00493,V027,27BBEVF0062J1ZM,fuzzy_ocr_artifact,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,55586.43,false,,frozen_test,"2B vendor_name OCR-corrupted to 'K0nark Fabricators an,d C0mpany'"
+PR-0494,2B-0442,INV-2604-00494,V035,06WWDLC2591N1Z0,fuzzy_vendor_name_variant,fuzzy,fuzzy,,,auto_reconcile,0.00,,false,1400.00,false,,calibration,2B vendor_name rendered as 'Orbit Chemicals India Pvt. Ltd..'
+PR-0495,2B-0121,INV-2604-00495,V022,27CBGHX9945C1ZJ,fuzzy_amount_rounding,fuzzy,fuzzy,,,auto_reconcile,-0.24,,false,50272.05,false,,calibration,taxable_value differs by Rs.0.24 (within Rs.1)
+PR-0496,2B-0299,INV-2604-00496,V008,33DBDFF6066I1ZB,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,1025.00,false,,frozen_test,all comparison fields identical
+PR-0497,2B-0065,INV-2604-00497,V007,27NFAOH7689K1ZL,credit_note_netting,classification_exception,rule_classified,,credit_note_netting,classified_exception,-5000.00,5000.00,false,79774.05,true,false,calibration,2B net of credit note Rs.5000.00
+PR-0498,2B-0396,INV-2604-00498,V022,27CBGHX9945C1ZJ,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,50272.05,false,,calibration,all comparison fields identical
+PR-0499,2B-0221,INV-2604-00499,V027,27BBEVF0062J1ZM,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,55586.43,false,,calibration,all comparison fields identical
+PR-0500,2B-0209,INV-2604-00500,V030,03RFLNG9701F1ZD,clean_exact_match,clean,exact,,,auto_reconcile,0.00,,false,164457.37,true,,frozen_test,all comparison fields identical
