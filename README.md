@@ -1,6 +1,13 @@
 # Exception Ledger
 
-GST purchase-register vs GSTR-2B reconciliation with a calibrated confidence gate.
+**A GST-specific finance controller that reconciles evidence, quantifies
+estimated ITC exposure and safely escalates uncertainty.**
+
+AI-assisted normalisation. Deterministic decisions. Auditable human review.
+
+> Reconciles a purchase register against **synthetic GSTR-2B-style data** using a
+> calibrated confidence gate. No live GSTN connectivity. Not tax advice.
+> See [Limitations](#limitations) before quoting any figure.
 
 The system architecture is **locked** at `Architecture_v2_FINAL.pdf`. That document
 is the source of truth; this README restates it and records what was built.

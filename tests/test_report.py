@@ -330,3 +330,67 @@ def test_to_dict_carries_benchmark_and_limitations(frozen):
     assert payload["benchmark"]["valid_records"] == 480
     assert payload["limitations"]
     assert payload["ai"]["requested"] is False
+
+
+# --- 0. executive summary / positioning ------------------------------------
+# The claim and its limits must stay on the same page. These guard against a
+# future edit keeping the marketing line and dropping the qualifier.
+
+def test_executive_summary_carries_the_positioning(frozen):
+    text = R.render(frozen)
+    assert "0. EXECUTIVE SUMMARY" in text
+    assert "GST-specific finance controller" in text
+    assert "estimated ITC exposure" in text
+    assert "safely escalates uncertainty" in text
+
+
+def test_executive_summary_carries_the_supporting_line(frozen):
+    assert ("AI-assisted normalisation. Deterministic decisions. "
+            "Auditable human review.") in R.render(frozen)
+
+
+def test_the_claim_never_appears_without_its_scope_qualifier(frozen):
+    """Synthetic data, no GSTN, not tax advice — stated wherever the claim is."""
+    text = R.render(frozen)
+    assert "synthetic GSTR-2B-style data" in text
+    assert "No live GSTN connectivity" in text
+    assert "Not tax advice" in text
+
+
+def test_the_report_claims_no_live_gstn_access(frozen):
+    text = R.render(frozen).lower()
+    for forbidden in ("live gstn", "connects to the gstn", "gstn api",
+                      "files your return", "tax advice from"):
+        if forbidden == "live gstn":
+            assert "no live gstn" in text        # only ever in the negative
+        else:
+            assert forbidden not in text
+
+
+def test_positioning_is_stated_once_not_repeated(frozen):
+    """'Do not repeat the tagline throughout' — one statement, one place."""
+    text = R.render(frozen)
+    assert text.count("GST-specific finance controller") == 1
+    assert text.count("Auditable human review") == 1
+
+
+def test_itc_exposure_is_quantified_not_just_claimed(frozen):
+    """The positioning says the tool quantifies ITC exposure, so the report
+    must actually carry a number."""
+    assert frozen.itc_exposure_total > 0
+    assert 0 < frozen.itc_exposure_breaching <= frozen.itc_exposure_total
+    assert f"{frozen.itc_exposure_total:,.2f}" in R.render(frozen)
+
+
+def test_itc_exposure_sums_the_rule_engine_variance(result, splits):
+    report = R.build_report(result, splits, R.FROZEN_TEST)
+    assert report.itc_exposure_total == pytest.approx(
+        round(sum(result.batch.itc_variance_by_gstin.values()), 2))
+
+
+def test_to_dict_carries_positioning_and_exposure(frozen):
+    payload = R.to_dict(frozen)
+    assert payload["positioning"]["statement"] == R.POSITIONING
+    assert payload["positioning"]["supporting_line"] == R.SUPPORTING_LINE
+    assert "synthetic GSTR-2B-style data" in payload["positioning"]["scope"]
+    assert payload["itc_exposure"]["total"] == frozen.itc_exposure_total

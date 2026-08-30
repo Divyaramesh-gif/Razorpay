@@ -36,6 +36,7 @@ from __future__ import annotations
 
 import csv
 import os
+import textwrap
 from collections import Counter
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Sequence
@@ -160,6 +161,8 @@ class EvaluationReport:
     dataset_seed: int
     suppliers_breaching_drc01c: int
     suppliers_total: int
+    itc_exposure_total: float = 0.0
+    itc_exposure_breaching: float = 0.0
     throughput: Dict[str, float] = field(default_factory=dict)
     ai_stats: Dict[str, int] = field(default_factory=dict)
     ai_assisted: bool = False
@@ -306,6 +309,10 @@ def build_report(result: PipelineResult,
         accuracy=accuracy,
         rules_version=result.rules_version,
         dataset_seed=dataset_seed,
+        itc_exposure_total=round(sum(result.batch.itc_variance_by_gstin.values()), 2),
+        itc_exposure_breaching=round(sum(
+            v for g, v in result.batch.itc_variance_by_gstin.items()
+            if g in breaching_suppliers), 2),
         suppliers_breaching_drc01c=len(breaching_suppliers),
         suppliers_total=len(result.batch.itc_variance_by_gstin),
         throughput=result.throughput(),
@@ -321,6 +328,20 @@ def build_report(result: PipelineResult,
 
 BAR = "=" * 76
 RULE = "-" * 76
+
+# Product positioning. Stated once, at the top of the report, alongside the
+# scope qualifier — a claim and its limits belong on the same page.
+POSITIONING = (
+    "A GST-specific finance controller that reconciles evidence, quantifies "
+    "estimated ITC exposure and safely escalates uncertainty."
+)
+SUPPORTING_LINE = (
+    "AI-assisted normalisation. Deterministic decisions. Auditable human review."
+)
+SCOPE_QUALIFIER = [
+    "Runs on synthetic GSTR-2B-style data. No live GSTN connectivity.",
+    "Not tax advice. See section 10 before quoting any figure.",
+]
 
 # Stated in the report itself, not only the README: a number is quoted far more
 # often than the document that qualifies it.
@@ -371,6 +392,33 @@ def render(report: EvaluationReport) -> str:
     add(f"  rules version       {report.rules_version}")
     add(f"  dataset seed        {report.dataset_seed}")
     add(f"  confidence threshold {report.confidence.threshold:g}")
+    add("")
+
+    # -- 0. executive summary ---------------------------------------------
+    add(RULE)
+    add("0. EXECUTIVE SUMMARY")
+    add(RULE)
+    for line in textwrap.wrap(POSITIONING, width=72):
+        add(f"  {line}")
+    add("")
+    add(f"  {SUPPORTING_LINE}")
+    add("")
+    for line in SCOPE_QUALIFIER:
+        add(f"  {line}")
+    add("")
+    mr0 = report.match_rate
+    add(f"  Reconciled          {mr0.resolved} of {mr0.total} records "
+        f"({100 * mr0.rate:.1f}%) — {mr0.exact} exact, {mr0.fuzzy} fuzzy, "
+        f"{mr0.rule_classified} rule-classified")
+    add(f"  Escalated           {report.indeterminate} indeterminate record(s) "
+        f"routed to human review")
+    add(f"  Quarantined         {report.quarantined} record(s) rejected at input "
+        f"validation, counted separately")
+    add(f"  ITC exposure        Rs.{report.itc_exposure_total:,.2f} estimated "
+        f"across {report.suppliers_total} suppliers")
+    add(f"                      Rs.{report.itc_exposure_breaching:,.2f} of it "
+        f"with the {report.suppliers_breaching_drc01c} supplier(s) over the "
+        f"DRC-01C trigger")
     add("")
 
     # -- 1. match rate, broken out ----------------------------------------
@@ -606,6 +654,17 @@ def to_dict(report: EvaluationReport) -> dict:
             "by_rule": report.audit.by_rule,
             "pending_review": report.audit.pending_review,
         },
+    }
+    payload["positioning"] = {
+        "statement": POSITIONING,
+        "supporting_line": SUPPORTING_LINE,
+        "scope": " ".join(SCOPE_QUALIFIER),
+    }
+    payload["itc_exposure"] = {
+        "total": report.itc_exposure_total,
+        "with_breaching_suppliers": report.itc_exposure_breaching,
+        "suppliers_total": report.suppliers_total,
+        "suppliers_breaching": report.suppliers_breaching_drc01c,
     }
     payload["benchmark"] = report.throughput
     payload["ai"] = {
