@@ -37,11 +37,45 @@ python3 -m src.pipeline --verify-reproducible     # run twice, compare fingerpri
 python3 -m src.pipeline --benchmark 3             # stable throughput (median of N)
 python3 -m src.pipeline --compare-ai              # deterministic vs AI-assisted
 python3 -m src.report                             # §2.7 report on the frozen 30%
-python3 -m pytest tests/ -q                       # 488 tests
+python3 -m src.dashboard                          # dashboard at http://127.0.0.1:8000
+python3 -m pytest tests/ -q                       # 564 tests
 ```
 
 `python3 calibrate.py --report-frozen` re-derives the confidence threshold.
 **Do not run it casually** — see *Evaluation protocol* below.
+
+## Dashboard
+
+```bash
+python3 -m src.dashboard          # then open http://127.0.0.1:8000
+```
+
+One command, no dependencies — `http.server` from the standard library. It runs
+the pipeline on start and renders what comes back.
+
+| Page | Shows |
+|---|---|
+| `/` | Record counts · the three gate outcomes · precision, coverage, throughput, estimated ITC exposure · normalisation mode · exception queue · quarantine summary · batch run controls · exports |
+| `/record?id=…` | Raw vs normalised values, field-level evidence, rule ID and version, confidence and threshold, operational checks, audit row |
+| `/quarantine` | Every quarantined record with its validation error and source row |
+| `/export/…` | `decisions.csv` · `queue.csv` · `quarantine.csv` · `audit.csv` · `report.json` · `report.txt` |
+
+**It is a presentation layer and nothing else.** Every figure is read from a
+`PipelineResult`, an `EvaluationReport`, the audit log or the frozen calibration
+artifact. It computes no reconciliation logic, and a test asserts no metric is
+hardcoded — change the run and the page changes.
+
+Two honest gaps, both stated in the UI rather than stubbed:
+
+- **No upload.** `pipeline.run()` reads fixed source files; accepting an
+  arbitrary batch would need a backend change. The Batch panel names the files
+  it will read and says so.
+- **Precision is read, not recomputed.** It comes from the stored frozen-split
+  confusion matrix in `calibration_v2026_04.yaml`, because §2.6 fixes those
+  numbers at calibration time. The panel cites its source.
+
+Colour encodes state, so it uses the fixed status palette — and every badge
+carries a glyph and a text label, so hue is never the only channel.
 
 ## Provenance
 
@@ -318,7 +352,7 @@ document that qualifies it.
 | **Human review is a queue** | `reviewer_decision` is nullable and `pending_review()` lists what waits. No UI, assignment or escalation. |
 | **Matcher is not perfect** | Deliberately ambiguous records are the weak spot; every outcome error traces to a matcher miss there, not a rule misfiring. |
 | **Live AI path unverified** | `normalize_ai_assisted()` has never made a real API call — no credentials in any build environment. Contract, gating and fallback are tested offline; the call itself is not. |
-| **No dashboard** | There is no UI and none was ever built — §5 defers the presentation layer, and the step-8 deliverable is `src/report.py` producing `.txt` and `.json`. Evidence lives in the audit log's `evidence_snapshot` but is not surfaced in the report; export is those two files only. |
+| **Dashboard is local and read-only** | `python3 -m src.dashboard` serves on localhost with no auth, no persistence beyond the pipeline's own logs, and no batch upload. It reviews a run; it cannot record a reviewer's decision back. |
 
 ## Scope boundaries — what this is NOT
 
