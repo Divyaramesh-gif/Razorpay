@@ -39,6 +39,7 @@ audit log precisely so both can refuse them.
 from __future__ import annotations
 
 import os
+import time
 from collections import Counter
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Sequence
@@ -94,6 +95,41 @@ class PipelineResult:
     # stay out of fingerprint(). They exist so a run where every call failed is
     # distinguishable from one where nothing needed repairing.
     ai_stats: Dict[str, int] = field(default_factory=dict)
+    # Wall-clock instrumentation. Measurement only — nothing here feeds a
+    # decision, and stage_seconds is excluded from fingerprint() so a slow
+    # machine never looks like a different result.
+    elapsed_seconds: float = 0.0
+    stage_seconds: Dict[str, float] = field(default_factory=dict)
+
+    @property
+    def valid_records(self) -> int:
+        """Records that passed §2.1 — the throughput denominator."""
+        return len(self.decisions)
+
+    @property
+    def records_per_second(self) -> float:
+        """Valid records processed per second of wall clock."""
+        if self.elapsed_seconds <= 0:
+            return 0.0
+        return round(self.valid_records / self.elapsed_seconds, 1)
+
+    @property
+    def total_records_per_second(self) -> float:
+        """All source rows read per second, quarantined ones included."""
+        if self.elapsed_seconds <= 0:
+            return 0.0
+        return round(self.total_read / self.elapsed_seconds, 1)
+
+    def throughput(self) -> Dict[str, float]:
+        return {
+            "elapsed_seconds": round(self.elapsed_seconds, 3),
+            "valid_records": self.valid_records,
+            "records_read": self.total_read,
+            "quarantined": self.quarantined_count,
+            "records_per_second": self.records_per_second,
+            "total_records_per_second": self.total_records_per_second,
+            "stage_seconds": {k: round(v, 3) for k, v in self.stage_seconds.items()},
+        }
 
     @property
     def ai_attempted(self) -> int:
@@ -170,6 +206,9 @@ def run(db_path: str = DEFAULT_DB_PATH,
     normalised: Dict[str, List[NormalizedRecord]] = {}
     quarantined: List[QuarantineEntry] = []
     ai_stats: Counter = Counter()
+    stage_seconds: Dict[str, float] = {}
+    _t0 = time.perf_counter()
+    _mark = _t0
 
     with QuarantineLog(db_path, now=now) as qlog:
         qlog.clear()
@@ -183,19 +222,27 @@ def run(db_path: str = DEFAULT_DB_PATH,
                 for result in valid
             ]
         quarantined = qlog.entries()
+    stage_seconds["validate_quarantine_normalise"] = time.perf_counter() - _mark
+    _mark = time.perf_counter()
 
     quarantined_ids = [entry.record_id for entry in quarantined]
 
     # ---- §2.3 matching ---------------------------------------------------
     match_result = M.match_records(normalised[SOURCE_PURCHASE_REGISTER],
                                    normalised[SOURCE_GSTR2B])
+    stage_seconds["match"] = time.perf_counter() - _mark
+    _mark = time.perf_counter()
 
     # ---- §2.4 evidence ---------------------------------------------------
     evidences = E.compare_all(match_result.matches)
+    stage_seconds["evidence"] = time.perf_counter() - _mark
+    _mark = time.perf_counter()
 
     # ---- §2.5 rules ------------------------------------------------------
     engine = RuleEngine(rules_path) if rules_path else RuleEngine()
     batch = engine.evaluate_batch(match_result.matches, evidences)
+    stage_seconds["rules"] = time.perf_counter() - _mark
+    _mark = time.perf_counter()
 
     # ---- §2.6 confidence + gate -----------------------------------------
     if threshold is None:
@@ -203,11 +250,14 @@ def run(db_path: str = DEFAULT_DB_PATH,
                      else C.load_threshold())
     decisions = decide_batch(batch.evaluations, evidences, threshold,
                              quarantined_record_ids=quarantined_ids)
+    stage_seconds["confidence_gate"] = time.perf_counter() - _mark
+    _mark = time.perf_counter()
 
     # ---- §2.7 audit log --------------------------------------------------
     with AuditLog(db_path, now=now) as alog:
         alog.clear()
         audit_entries = alog.record_all(decisions, evidences)
+    stage_seconds["audit_log"] = time.perf_counter() - _mark
 
     return PipelineResult(
         records_read=records_read,
@@ -223,6 +273,8 @@ def run(db_path: str = DEFAULT_DB_PATH,
         db_path=db_path,
         ai_assisted=ai_client is not None,
         ai_stats=dict(ai_stats),
+        elapsed_seconds=time.perf_counter() - _t0,
+        stage_seconds=stage_seconds,
     )
 
 
@@ -270,6 +322,84 @@ def fingerprint(result: PipelineResult) -> str:
 # CLI
 # ---------------------------------------------------------------------------
 
+def compare_deterministic_vs_ai(db_path: str, ai_client: Any,
+                                now: Optional[str] = None) -> Dict[str, Any]:
+    """Run the pipeline both ways and diff the results.
+
+    Measurement, not a stage. The AI half may only rewrite free text, so the
+    interesting questions are: did any normalised value change, and did any
+    DECISION change as a result?
+    """
+    baseline = run(db_path=db_path + ".det", now=now, ai_client=None)
+    assisted = run(db_path=db_path + ".ai", now=now, ai_client=ai_client)
+
+    base_norm = {r.source_id: r.normalized
+                 for recs in baseline.normalised.values() for r in recs}
+    ai_norm = {r.source_id: r.normalized
+               for recs in assisted.normalised.values() for r in recs}
+    changed_fields = sorted({
+        (rid, field)
+        for rid, values in ai_norm.items()
+        for field, value in values.items()
+        if base_norm.get(rid, {}).get(field) != value
+    })
+
+    base_dec = {d.record_id: (d.outcome, d.category, d.confidence.value)
+                for d in baseline.decisions}
+    changed_decisions = sorted(
+        rid for d in assisted.decisions
+        for rid in [d.record_id]
+        if base_dec.get(rid) != (d.outcome, d.category, d.confidence.value)
+    )
+
+    return {
+        "deterministic": {
+            "fingerprint": fingerprint(baseline),
+            "outcomes": baseline.outcome_counts(),
+            "throughput": baseline.throughput(),
+        },
+        "ai_assisted": {
+            "fingerprint": fingerprint(assisted),
+            "outcomes": assisted.outcome_counts(),
+            "throughput": assisted.throughput(),
+            "ai_stats": assisted.ai_stats,
+            "fell_back_entirely": assisted.ai_fell_back_entirely,
+        },
+        "normalised_fields_changed": changed_fields,
+        "decisions_changed": changed_decisions,
+        "identical_decisions": fingerprint(baseline) == fingerprint(assisted),
+    }
+
+
+def _compare_ai(args) -> int:
+    client = N.build_client()
+    if client is None:
+        print("  !! no Anthropic client available; comparison would be vacuous")
+        return 1
+    d = compare_deterministic_vs_ai(args.db, client, args.now)
+
+    print("Deterministic-only vs AI-assisted\n")
+    print(f"  {'':<26} {'deterministic':>16} {'AI-assisted':>16}")
+    for key in ("auto_reconcile", "classified_exception", "indeterminate"):
+        print(f"  {key:<26} {d['deterministic']['outcomes'][key]:>16} "
+              f"{d['ai_assisted']['outcomes'][key]:>16}")
+    print(f"  {'elapsed (s)':<26} "
+          f"{d['deterministic']['throughput']['elapsed_seconds']:>16.3f} "
+          f"{d['ai_assisted']['throughput']['elapsed_seconds']:>16.3f}")
+    print(f"  {'records/second':<26} "
+          f"{d['deterministic']['throughput']['records_per_second']:>16.1f} "
+          f"{d['ai_assisted']['throughput']['records_per_second']:>16.1f}")
+    print(f"\n  AI outcomes          {d['ai_assisted']['ai_stats']}")
+    print(f"  normalised fields changed by the AI half: "
+          f"{len(d['normalised_fields_changed'])}")
+    print(f"  DECISIONS changed:   {len(d['decisions_changed'])}")
+    print(f"  identical decisions: {d['identical_decisions']}")
+    if d["ai_assisted"]["fell_back_entirely"]:
+        print("\n  !! every AI call failed — this comparison shows the fallback "
+              "path,\n     not a working AI half.")
+    return 0
+
+
 def _main(argv=None) -> int:
     import argparse
 
@@ -283,7 +413,12 @@ def _main(argv=None) -> int:
                     help="enable the §2.2 AI-assisted normalisation half")
     ap.add_argument("--verify-reproducible", action="store_true",
                     help="run twice and compare decision fingerprints")
+    ap.add_argument("--compare-ai", action="store_true",
+                    help="run deterministic-only and AI-assisted, and diff them")
     args = ap.parse_args(argv)
+
+    if args.compare_ai:
+        return _compare_ai(args)
 
     client = N.build_client() if args.ai else None
     if args.ai and client is None:
@@ -329,7 +464,19 @@ def _main(argv=None) -> int:
     for outcome, n in result.outcome_counts().items():
         print(f"  {outcome:<24} {n:>4}")
     print(f"\n  audit rows {len(result.audit_entries)}  in {args.db}")
-    print(f"  fingerprint {fingerprint(result)}")
+
+    t = result.throughput()
+    print(f"\n  THROUGHPUT")
+    print(f"    elapsed            {t['elapsed_seconds']:>8.3f} s")
+    print(f"    valid records      {t['valid_records']:>8}")
+    print(f"    records/second     {t['records_per_second']:>8.1f}  (valid only)")
+    print(f"    rows/second        {t['total_records_per_second']:>8.1f}  "
+          f"(all {t['records_read']} source rows)")
+    for stage, seconds in result.stage_seconds.items():
+        share = 100 * seconds / result.elapsed_seconds if result.elapsed_seconds else 0
+        print(f"      {stage:<32} {seconds:>7.3f} s  {share:>5.1f}%")
+
+    print(f"\n  fingerprint {fingerprint(result)}")
 
     if args.verify_reproducible:
         second = run(db_path=args.db, ai_client=client, now=args.now)

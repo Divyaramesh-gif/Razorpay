@@ -160,6 +160,10 @@ class EvaluationReport:
     dataset_seed: int
     suppliers_breaching_drc01c: int
     suppliers_total: int
+    throughput: Dict[str, float] = field(default_factory=dict)
+    ai_stats: Dict[str, int] = field(default_factory=dict)
+    ai_assisted: bool = False
+    ai_fell_back_entirely: bool = False
 
 
 # ---------------------------------------------------------------------------
@@ -304,6 +308,10 @@ def build_report(result: PipelineResult,
         dataset_seed=dataset_seed,
         suppliers_breaching_drc01c=len(breaching_suppliers),
         suppliers_total=len(result.batch.itc_variance_by_gstin),
+        throughput=result.throughput(),
+        ai_stats=dict(result.ai_stats),
+        ai_assisted=result.ai_assisted,
+        ai_fell_back_entirely=result.ai_fell_back_entirely,
     )
 
 
@@ -313,6 +321,41 @@ def build_report(result: PipelineResult,
 
 BAR = "=" * 76
 RULE = "-" * 76
+
+# Stated in the report itself, not only the README: a number is quoted far more
+# often than the document that qualifies it.
+LIMITATIONS = [
+    "* SYNTHETIC DATA. Every figure comes from data/generate_dataset.py",
+    "  (seed 20260401). The injected defects damage high-weight evidence",
+    "  fields while the fuzzy cases damage only low-weight ones, so the two",
+    "  confidence populations cannot overlap. Real filings do overlap. Treat",
+    "  these numbers as evidence the protocol is wired correctly, NOT as a",
+    "  production forecast.",
+    "",
+    "* SINGLE BATCH, SINGLE PERIOD. One return period (2026-04) against one",
+    "  prior-period snapshot. No multi-period carry-forward, no amendment",
+    "  tracking, no incremental or streaming runs.",
+    "",
+    "* THROUGHPUT IS INDICATIVE. Single-threaded, one process, no cache, on",
+    "  one machine. Matching is O(PR x 2B), so seconds/record grows with the",
+    "  square of batch size, not linearly.",
+    "",
+    "* SYNTHETIC DRC-01C TRIGGER. Rs.75,000 cumulative variance, not the",
+    "  statutory Rs.25 lakh test, which no invoice in this batch approaches.",
+    "",
+    "* NOT A FILING TOOL AND NOT TAX ADVICE. Nothing here files or amends a",
+    "  return or talks to the GSTN. Rule IDs are a triage aid; the rules",
+    "  recognise the defect patterns this dataset contains, not the full",
+    "  statutory surface.",
+    "",
+    "* HUMAN REVIEW IS A QUEUE, NOT A WORKFLOW. reviewer_decision is nullable",
+    "  and pending_review() lists what is waiting. No UI, assignment or",
+    "  escalation exists.",
+    "",
+    "* MATCHER ACCURACY IS NOT PERFECT. Deliberately ambiguous records are",
+    "  the weak spot; every outcome error traces to a matcher miss on one of",
+    "  those rather than to a rule misfiring.",
+]
 
 
 def render(report: EvaluationReport) -> str:
@@ -456,6 +499,52 @@ def render(report: EvaluationReport) -> str:
             for record_id, expected, actual in a.disagreements:
                 add(f"      {record_id:<28} expected {expected:<22} got {actual}")
 
+    # -- 9. benchmark ------------------------------------------------------
+    add("")
+    add(RULE)
+    add("9. BENCHMARK — throughput")
+    add(RULE)
+    t = report.throughput
+    if t:
+        add(f"  elapsed             {t['elapsed_seconds']:>8.3f} s   "
+            f"(whole batch, not just this split)")
+        add(f"  valid records       {t['valid_records']:>8}")
+        add(f"  records/second      {t['records_per_second']:>8.1f}   valid only")
+        add(f"  rows/second         {t['total_records_per_second']:>8.1f}   "
+            f"all {t['records_read']} source rows")
+        add("")
+        add(f"  {'stage':<34} {'seconds':>9} {'share':>7}")
+        for stage, seconds in t.get("stage_seconds", {}).items():
+            share = 100 * seconds / t["elapsed_seconds"] if t["elapsed_seconds"] else 0
+            add(f"  {stage:<34} {seconds:>9.3f} {share:>6.1f}%")
+        add("")
+        add("  Single-threaded, one process, no cache. Matching dominates: it")
+        add("  scores the full PR x 2B cross product (§2.3 step 2).")
+    else:
+        add("  (not measured)")
+
+    add("")
+    add(f"  AI-assisted normalisation (§2.2)")
+    if not report.ai_assisted:
+        add("      not requested — deterministic half only")
+    else:
+        add(f"      attempted {report.ai_stats.get('ai_attempted', 0)}  "
+            f"applied {report.ai_stats.get('ai_applied', 0)}  "
+            f"failed {report.ai_stats.get('ai_call_failed', 0)}  "
+            f"contract-rejected {report.ai_stats.get('ai_contract_violation', 0)}")
+        if report.ai_fell_back_entirely:
+            add("      !! EVERY AI CALL FAILED — deterministic fallback used "
+                "throughout.")
+            add("         This batch is NOT AI-normalised.")
+
+    # -- 10. limitations ---------------------------------------------------
+    add("")
+    add(RULE)
+    add("10. LIMITATIONS — read before quoting any number above")
+    add(RULE)
+    for line in LIMITATIONS:
+        add(f"  {line}")
+
     add("")
     add(BAR)
     return "\n".join(out)
@@ -505,6 +594,13 @@ def to_dict(report: EvaluationReport) -> dict:
             "pending_review": report.audit.pending_review,
         },
     }
+    payload["benchmark"] = report.throughput
+    payload["ai"] = {
+        "requested": report.ai_assisted,
+        "stats": report.ai_stats,
+        "fell_back_entirely": report.ai_fell_back_entirely,
+    }
+    payload["limitations"] = [l for l in LIMITATIONS if l]
     if report.accuracy is not None:
         payload["accuracy"] = {
             "correct": report.accuracy.correct,

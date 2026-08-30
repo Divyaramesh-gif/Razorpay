@@ -299,3 +299,59 @@ def test_ai_stats_stay_out_of_the_fingerprint(tmp_path, result):
                    ai_client=_AlwaysFailsClient())
     assert failed.ai_stats != result.ai_stats
     assert P.fingerprint(failed) == P.fingerprint(result)
+
+
+# ==========================================================================
+# Throughput measurement
+# ==========================================================================
+# Instrumentation only. Nothing here feeds a decision, and stage_seconds is
+# excluded from fingerprint() so a slow machine never looks like a different
+# result.
+
+def test_throughput_is_measured(result):
+    t = result.throughput()
+    assert t["elapsed_seconds"] > 0
+    assert t["valid_records"] == 480
+    assert t["records_read"] == 990
+    assert t["quarantined"] == 20
+    assert t["records_per_second"] > 0
+
+
+def test_records_per_second_is_valid_records_over_elapsed(result):
+    assert result.records_per_second == pytest.approx(
+        round(result.valid_records / result.elapsed_seconds, 1))
+
+
+def test_valid_records_excludes_quarantined(result):
+    """Throughput counts what was actually processed through the gate."""
+    assert result.valid_records == result.scored == len(result.decisions)
+    assert result.valid_records + result.quarantined_count == \
+        result.records_read[SOURCE_PURCHASE_REGISTER]
+
+
+def test_every_stage_is_timed(result):
+    assert set(result.stage_seconds) == {
+        "validate_quarantine_normalise", "match", "evidence", "rules",
+        "confidence_gate", "audit_log"}
+    assert all(v >= 0 for v in result.stage_seconds.values())
+
+
+def test_stage_times_roughly_account_for_the_elapsed_total(result):
+    assert sum(result.stage_seconds.values()) <= result.elapsed_seconds + 0.01
+
+
+def test_timing_stays_out_of_the_fingerprint(tmp_path, result):
+    """A slower machine must not look like a different result."""
+    again = P.run(db_path=str(tmp_path / "timed.sqlite"), now=FIXED_NOW)
+    assert again.elapsed_seconds != result.elapsed_seconds or True   # may tie
+    assert P.fingerprint(again) == P.fingerprint(result)
+
+
+def test_zero_elapsed_does_not_divide_by_zero():
+    blank = P.PipelineResult(
+        records_read={}, quarantined=[], normalised={},
+        match_result=None, evidences=[], batch=None, threshold=0.0,
+        decisions=[], audit_entries=[], rules_version="x", db_path="x",
+        elapsed_seconds=0.0)
+    assert blank.records_per_second == 0.0
+    assert blank.total_records_per_second == 0.0

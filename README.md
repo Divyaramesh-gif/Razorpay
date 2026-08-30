@@ -27,8 +27,9 @@ pip install -r requirements.txt
 python3 data/generate_dataset.py                  # regenerate the dataset (+31 checks)
 python3 -m src.pipeline                           # run the pipeline (label-blind)
 python3 -m src.pipeline --verify-reproducible     # run twice, compare fingerprints
+python3 -m src.pipeline --compare-ai              # deterministic vs AI-assisted
 python3 -m src.report                             # §2.7 report on the frozen 30%
-python3 -m pytest tests/ -q                       # 408 tests
+python3 -m pytest tests/ -q                       # 471 tests
 ```
 
 `python3 calibrate.py --report-frozen` re-derives the confidence threshold.
@@ -156,6 +157,54 @@ deliberately ambiguous or absent records, traceable to Phase 3 matcher misses.
 Whole-batch figures: 480 scored — 365 auto-reconcile, 92 classified exception,
 23 indeterminate; 97.5% outcome accuracy with **zero false auto-reconciles**.
 
+### Benchmark
+
+Measured on this container, median of 3 runs, single-threaded, no cache:
+
+| Metric | Value |
+|---|---|
+| Elapsed (whole batch) | **3.53 s** |
+| Valid records | 480 |
+| **Records/second** (valid only) | **135.9** |
+| Rows/second (all 990 source rows) | 280.5 |
+
+| Stage | Seconds | Share |
+|---|---|---|
+| validate + quarantine + normalise | 0.055 | 1.6% |
+| **match** | **3.041** | **86.1%** |
+| evidence | 0.008 | 0.2% |
+| rules | 0.012 | 0.3% |
+| confidence gate | 0.005 | 0.1% |
+| audit log | 0.404 | 11.4% |
+
+Matching dominates because §2.3 step 2 scores the **full cross product** —
+480 × 490 = 235,200 pairs. That is O(n²): seconds per record grows with the
+square of batch size, not linearly. At 10× the batch, expect roughly 100× the
+matching time. The architecture accepts this deliberately (§2.3 chooses greedy
+over Hungarian for explainability "at this batch size"); it is the first thing
+to revisit if batches grow.
+
+`python3 -m src.pipeline` prints the same table per run.
+
+### Deterministic vs AI-assisted
+
+`python3 -m src.pipeline --compare-ai` runs both and diffs them. With no
+credentials in this environment:
+
+| | deterministic | AI-assisted |
+|---|---|---|
+| auto_reconcile | 365 | 365 |
+| classified_exception | 92 | 92 |
+| indeterminate | 23 | 23 |
+| normalised fields changed | — | 0 |
+| decisions changed | — | 0 |
+| AI outcomes | — | 45 attempted, **45 failed** |
+
+Identical, because every AI call failed and the deterministic value stood.
+That is the fallback working, **not** evidence the AI half functions. With a
+working client the only field that can change is `vendor_name`, and a test
+asserts exactly that.
+
 ### Reproducibility
 
 `python3 -m src.pipeline --verify-reproducible` runs the pipeline twice and
@@ -228,6 +277,24 @@ The repo root maps to the architecture's `exception-ledger/` root, so `data/`,
 `src/` and `tests/` sit at the top level. The Phase 2–4 scaffolding runners
 (`run_phase2.py`, `run_phase3.py`, `run_phase4.py`) were absorbed into
 `src/pipeline.py` at step 8 and removed, as planned.
+
+## Limitations
+
+Read these before quoting any number above. They are also printed in section
+10 of every evaluation report, because a figure travels further than the
+document that qualifies it.
+
+| Limitation | Detail |
+|---|---|
+| **Synthetic data** | Every figure comes from `generate_dataset.py` (seed 20260401). Injected defects damage high-weight evidence fields while fuzzy cases damage only low-weight ones, so the two confidence populations *cannot* overlap. Real filings do. |
+| **Single batch, single period** | One return period (2026-04) against one prior snapshot. No carry-forward, amendments, or incremental runs. |
+| **Throughput is indicative** | One machine, single-threaded, no cache. Matching is O(PR × 2B). |
+| **Synthetic DRC-01C trigger** | ₹75,000, not the statutory ₹25 lakh — which no invoice here approaches. |
+| **Not a filing tool, not tax advice** | Nothing files or amends a return. Rule IDs are a triage aid covering this dataset's defect patterns, not the statutory surface. |
+| **Human review is a queue** | `reviewer_decision` is nullable and `pending_review()` lists what waits. No UI, assignment or escalation. |
+| **Matcher is not perfect** | Deliberately ambiguous records are the weak spot; every outcome error traces to a matcher miss there, not a rule misfiring. |
+| **Live AI path unverified** | `normalize_ai_assisted()` has never made a real API call — no credentials in any build environment. Contract, gating and fallback are tested offline; the call itself is not. |
+| **No dashboard** | There is no UI. `src/report.py` produces text and JSON; there is no interactive view, no export beyond those files. |
 
 ## Scope boundaries — what this is NOT
 

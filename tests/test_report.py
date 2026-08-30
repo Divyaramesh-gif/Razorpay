@@ -269,3 +269,64 @@ def test_report_is_deterministic(result, splits):
     a = R.render(R.build_report(result, splits, R.FROZEN_TEST))
     b = R.render(R.build_report(result, splits, R.FROZEN_TEST))
     assert a == b
+
+
+# --- 9 & 10. benchmark and limitations -------------------------------------
+
+def test_report_carries_throughput(frozen):
+    t = frozen.throughput
+    assert t["valid_records"] == 480
+    assert t["elapsed_seconds"] > 0
+    assert t["records_per_second"] > 0
+    assert set(t["stage_seconds"]) >= {"match", "rules", "audit_log"}
+
+
+def test_render_includes_the_benchmark_table(frozen):
+    text = R.render(frozen)
+    assert "9. BENCHMARK" in text
+    assert "records/second" in text
+    assert "match" in text
+
+
+def test_render_includes_limitations(frozen):
+    text = R.render(frozen)
+    assert "10. LIMITATIONS" in text
+    for phrase in ("SYNTHETIC DATA", "NOT a", "SINGLE BATCH",
+                   "NOT A FILING TOOL", "THROUGHPUT IS INDICATIVE"):
+        assert phrase in text, phrase
+
+
+def test_limitations_warn_against_quoting_the_numbers(frozen):
+    text = R.render(frozen)
+    assert "read before quoting any number" in text.lower()
+    assert "production forecast" in text
+
+
+def test_report_states_ai_status(frozen):
+    """A reader must be able to tell whether the batch was AI-normalised."""
+    text = R.render(frozen)
+    assert "AI-assisted normalisation" in text
+    assert "not requested" in text
+
+
+def test_report_warns_when_the_ai_half_fell_back_entirely(result, splits, tmp_path):
+    from src import pipeline as Pp
+
+    class Boom:
+        messages = property(lambda self: self)
+
+        def create(self, **kwargs):
+            raise RuntimeError("no credentials")
+
+    failed = Pp.run(db_path=str(tmp_path / "f.sqlite"), now=FIXED_NOW,
+                    ai_client=Boom())
+    text = R.render(R.build_report(failed, splits, R.FROZEN_TEST))
+    assert "EVERY AI CALL FAILED" in text
+    assert "NOT AI-normalised" in text
+
+
+def test_to_dict_carries_benchmark_and_limitations(frozen):
+    payload = R.to_dict(frozen)
+    assert payload["benchmark"]["valid_records"] == 480
+    assert payload["limitations"]
+    assert payload["ai"]["requested"] is False
