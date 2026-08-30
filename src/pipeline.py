@@ -120,8 +120,33 @@ class PipelineResult:
             return 0.0
         return round(self.total_read / self.elapsed_seconds, 1)
 
-    def throughput(self) -> Dict[str, float]:
+    @property
+    def mode(self) -> str:
+        """Which normalisation half ran. Throughput is not comparable across
+        modes: the AI half adds a network round trip per messy field."""
+        if not self.ai_assisted:
+            return "deterministic"
+        if self.ai_fell_back_entirely:
+            return "ai_requested_all_failed"
+        return "ai_assisted"
+
+    @property
+    def batch_size(self) -> Dict[str, int]:
+        """The shape of the batch a measurement was taken over. Matching is
+        O(PR x 2B), so a records/second figure is meaningless without it."""
+        pr = len(self.normalised.get(SOURCE_PURCHASE_REGISTER, []))
+        b2 = len(self.normalised.get(SOURCE_GSTR2B, []))
         return {
+            "purchase_register_rows": self.records_read.get(
+                SOURCE_PURCHASE_REGISTER, 0),
+            "gstr2b_rows": self.records_read.get(SOURCE_GSTR2B, 0),
+            "match_matrix_cells": pr * b2,
+        }
+
+    def throughput(self) -> Dict[str, Any]:
+        return {
+            "mode": self.mode,
+            "batch_size": self.batch_size,
             "elapsed_seconds": round(self.elapsed_seconds, 3),
             "valid_records": self.valid_records,
             "records_read": self.total_read,
@@ -400,6 +425,76 @@ def _compare_ai(args) -> int:
     return 0
 
 
+def benchmark(repeats: int = 3, db_path: str = DEFAULT_DB_PATH,
+              now: Optional[str] = None, ai_client: Any = None) -> Dict[str, Any]:
+    """Repeat the run and report the MEDIAN, plus the spread.
+
+    A single timing on a shared machine is noise. The median of several runs is
+    the stable figure; min and max show how much to trust it. Decisions are
+    identical every time (same fingerprint), so only the clock varies.
+    """
+    import statistics
+
+    runs = [run(db_path=db_path, now=now, ai_client=ai_client)
+            for _ in range(max(1, repeats))]
+    elapsed = [r.elapsed_seconds for r in runs]
+    rps = [r.records_per_second for r in runs]
+    fingerprints = {fingerprint(r) for r in runs}
+
+    stages: Dict[str, List[float]] = {}
+    for r in runs:
+        for stage, seconds in r.stage_seconds.items():
+            stages.setdefault(stage, []).append(seconds)
+
+    return {
+        "repeats": len(runs),
+        "mode": runs[0].mode,
+        "batch_size": runs[0].batch_size,
+        "valid_records": runs[0].valid_records,
+        "records_read": runs[0].total_read,
+        "elapsed_seconds": {
+            "min": round(min(elapsed), 3),
+            "median": round(statistics.median(elapsed), 3),
+            "max": round(max(elapsed), 3),
+        },
+        "records_per_second": {
+            "min": round(min(rps), 1),
+            "median": round(statistics.median(rps), 1),
+            "max": round(max(rps), 1),
+        },
+        "stage_seconds_median": {
+            k: round(statistics.median(v), 3) for k, v in stages.items()
+        },
+        "decisions_identical_across_runs": len(fingerprints) == 1,
+        "fingerprint": sorted(fingerprints)[0],
+    }
+
+
+def _print_benchmark(b: Dict[str, Any]) -> None:
+    print("Throughput benchmark\n")
+    print(f"  mode               {b['mode']}")
+    print(f"  batch size         "
+          f"{b['batch_size']['purchase_register_rows']} register rows x "
+          f"{b['batch_size']['gstr2b_rows']} 2B rows "
+          f"({b['batch_size']['match_matrix_cells']:,} match-matrix cells)")
+    print(f"  valid records      {b['valid_records']}  "
+          f"of {b['records_read']} rows read")
+    print(f"  repeats            {b['repeats']}  (median reported; "
+          f"min/max show the spread)")
+    e, r = b["elapsed_seconds"], b["records_per_second"]
+    print(f"\n  {'metric':<22} {'min':>9} {'median':>9} {'max':>9}")
+    print(f"  {'elapsed (s)':<22} {e['min']:>9.3f} {e['median']:>9.3f} {e['max']:>9.3f}")
+    print(f"  {'records/second':<22} {r['min']:>9.1f} {r['median']:>9.1f} {r['max']:>9.1f}")
+    print(f"\n  median per stage:")
+    total = b["elapsed_seconds"]["median"]
+    for stage, seconds in b["stage_seconds_median"].items():
+        share = 100 * seconds / total if total else 0
+        print(f"    {stage:<34} {seconds:>7.3f} s  {share:>5.1f}%")
+    print(f"\n  decisions identical across all runs: "
+          f"{b['decisions_identical_across_runs']}")
+    print(f"  fingerprint {b['fingerprint']}")
+
+
 def _main(argv=None) -> int:
     import argparse
 
@@ -415,10 +510,16 @@ def _main(argv=None) -> int:
                     help="run twice and compare decision fingerprints")
     ap.add_argument("--compare-ai", action="store_true",
                     help="run deterministic-only and AI-assisted, and diff them")
+    ap.add_argument("--benchmark", type=int, metavar="N", default=0,
+                    help="run N times and report median throughput")
     args = ap.parse_args(argv)
 
     if args.compare_ai:
         return _compare_ai(args)
+    if args.benchmark:
+        _print_benchmark(benchmark(args.benchmark, args.db, args.now,
+                                   N.build_client() if args.ai else None))
+        return 0
 
     client = N.build_client() if args.ai else None
     if args.ai and client is None:
@@ -467,6 +568,11 @@ def _main(argv=None) -> int:
 
     t = result.throughput()
     print(f"\n  THROUGHPUT")
+    print(f"    mode               {t['mode']}")
+    print(f"    batch size         "
+          f"{t['batch_size']['purchase_register_rows']} x "
+          f"{t['batch_size']['gstr2b_rows']} rows "
+          f"({t['batch_size']['match_matrix_cells']:,} match cells)")
     print(f"    elapsed            {t['elapsed_seconds']:>8.3f} s")
     print(f"    valid records      {t['valid_records']:>8}")
     print(f"    records/second     {t['records_per_second']:>8.1f}  (valid only)")

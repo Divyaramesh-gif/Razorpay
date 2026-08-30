@@ -27,9 +27,10 @@ pip install -r requirements.txt
 python3 data/generate_dataset.py                  # regenerate the dataset (+31 checks)
 python3 -m src.pipeline                           # run the pipeline (label-blind)
 python3 -m src.pipeline --verify-reproducible     # run twice, compare fingerprints
+python3 -m src.pipeline --benchmark 3             # stable throughput (median of N)
 python3 -m src.pipeline --compare-ai              # deterministic vs AI-assisted
 python3 -m src.report                             # §2.7 report on the frozen 30%
-python3 -m pytest tests/ -q                       # 471 tests
+python3 -m pytest tests/ -q                       # 488 tests
 ```
 
 `python3 calibrate.py --report-frozen` re-derives the confidence threshold.
@@ -159,23 +160,38 @@ Whole-batch figures: 480 scored — 365 auto-reconcile, 92 classified exception,
 
 ### Benchmark
 
-Measured on this container, median of 3 runs, single-threaded, no cache:
+```bash
+python3 -m src.pipeline --benchmark 3     # median of N runs, with spread
+```
 
-| Metric | Value |
+**Method:** wall clock (`time.perf_counter`) around each stage, single-threaded,
+one process, no cache, on this container. A single timing is noise, so the
+figure below is the **median of 3 runs** with min/max showing how much to trust
+it. Decisions are identical across every run (same fingerprint) — only the
+clock varies.
+
+| | |
 |---|---|
-| Elapsed (whole batch) | **3.53 s** |
-| Valid records | 480 |
-| **Records/second** (valid only) | **135.9** |
-| Rows/second (all 990 source rows) | 280.5 |
+| Mode | `deterministic` |
+| Batch size | 500 register rows × 490 2B rows (**235,200** match-matrix cells) |
+| Valid records | 480 of 990 rows read |
 
-| Stage | Seconds | Share |
+| Metric | min | **median** | max |
+|---|---|---|---|
+| Elapsed (s) | 3.220 | **3.336** | 3.407 |
+| Records/second | 140.9 | **143.9** | 149.1 |
+
+Throughput is **not comparable across modes** — the AI half adds a network
+round trip per messy field — nor across batch sizes, for the O(n²) reason below.
+
+| Stage (median) | Seconds | Share |
 |---|---|---|
-| validate + quarantine + normalise | 0.055 | 1.6% |
-| **match** | **3.041** | **86.1%** |
-| evidence | 0.008 | 0.2% |
-| rules | 0.012 | 0.3% |
+| validate + quarantine + normalise | 0.054 | 1.6% |
+| **match** | **2.867** | **85.9%** |
+| evidence | 0.007 | 0.2% |
+| rules | 0.011 | 0.3% |
 | confidence gate | 0.005 | 0.1% |
-| audit log | 0.404 | 11.4% |
+| audit log | 0.396 | 11.9% |
 
 Matching dominates because §2.3 step 2 scores the **full cross product** —
 480 × 490 = 235,200 pairs. That is O(n²): seconds per record grows with the
@@ -184,7 +200,8 @@ matching time. The architecture accepts this deliberately (§2.3 chooses greedy
 over Hungarian for explainability "at this batch size"); it is the first thing
 to revisit if batches grow.
 
-`python3 -m src.pipeline` prints the same table per run.
+`python3 -m src.pipeline` prints mode, batch size and a single-run
+breakdown; `--benchmark N` prints the stable median table above.
 
 ### Deterministic vs AI-assisted
 
@@ -294,7 +311,7 @@ document that qualifies it.
 | **Human review is a queue** | `reviewer_decision` is nullable and `pending_review()` lists what waits. No UI, assignment or escalation. |
 | **Matcher is not perfect** | Deliberately ambiguous records are the weak spot; every outcome error traces to a matcher miss there, not a rule misfiring. |
 | **Live AI path unverified** | `normalize_ai_assisted()` has never made a real API call — no credentials in any build environment. Contract, gating and fallback are tested offline; the call itself is not. |
-| **No dashboard** | There is no UI. `src/report.py` produces text and JSON; there is no interactive view, no export beyond those files. |
+| **No dashboard** | There is no UI and none was ever built — §5 defers the presentation layer, and the step-8 deliverable is `src/report.py` producing `.txt` and `.json`. Evidence lives in the audit log's `evidence_snapshot` but is not surfaced in the report; export is those two files only. |
 
 ## Scope boundaries — what this is NOT
 

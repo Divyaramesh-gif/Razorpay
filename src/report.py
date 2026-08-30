@@ -506,6 +506,14 @@ def render(report: EvaluationReport) -> str:
     add(RULE)
     t = report.throughput
     if t:
+        add(f"  mode                {t.get('mode', 'unknown')}")
+        b = t.get("batch_size", {})
+        if b:
+            add(f"  batch size          "
+                f"{b.get('purchase_register_rows', 0)} register rows x "
+                f"{b.get('gstr2b_rows', 0)} 2B rows")
+            add(f"                      "
+                f"{b.get('match_matrix_cells', 0):,} match-matrix cells")
         add(f"  elapsed             {t['elapsed_seconds']:>8.3f} s   "
             f"(whole batch, not just this split)")
         add(f"  valid records       {t['valid_records']:>8}")
@@ -518,8 +526,13 @@ def render(report: EvaluationReport) -> str:
             share = 100 * seconds / t["elapsed_seconds"] if t["elapsed_seconds"] else 0
             add(f"  {stage:<34} {seconds:>9.3f} {share:>6.1f}%")
         add("")
-        add("  Single-threaded, one process, no cache. Matching dominates: it")
-        add("  scores the full PR x 2B cross product (§2.3 step 2).")
+        add("  METHOD: wall clock (time.perf_counter) around each stage of one")
+        add("  run, single-threaded, one process, no cache. For a stable figure")
+        add("  use `python3 -m src.pipeline --benchmark N`, which repeats the")
+        add("  run and reports the median with min/max spread.")
+        add("")
+        add("  Matching dominates: it scores the full PR x 2B cross product")
+        add("  (§2.3 step 2), so cost is O(n^2) in batch size, not linear.")
     else:
         add("  (not measured)")
 

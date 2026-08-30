@@ -355,3 +355,50 @@ def test_zero_elapsed_does_not_divide_by_zero():
         elapsed_seconds=0.0)
     assert blank.records_per_second == 0.0
     assert blank.total_records_per_second == 0.0
+
+
+def test_throughput_records_the_mode(result):
+    """A records/second figure is meaningless without knowing which
+    normalisation half produced it."""
+    assert result.mode == "deterministic"
+    assert result.throughput()["mode"] == "deterministic"
+
+
+def test_throughput_records_the_batch_size(result):
+    """Matching is O(PR x 2B), so the shape must travel with the number."""
+    b = result.throughput()["batch_size"]
+    assert b["purchase_register_rows"] == 500
+    assert b["gstr2b_rows"] == 490
+    assert b["match_matrix_cells"] == 480 * 490
+
+
+def test_mode_distinguishes_a_failed_ai_run(tmp_path):
+    class Boom:
+        messages = property(lambda self: self)
+
+        def create(self, **kwargs):
+            raise RuntimeError("no credentials")
+
+    failed = P.run(db_path=str(tmp_path / "m.sqlite"), now=FIXED_NOW,
+                   ai_client=Boom())
+    assert failed.mode == "ai_requested_all_failed"
+    assert failed.mode != "ai_assisted"
+
+
+def test_benchmark_reports_median_and_spread(tmp_path):
+    b = P.benchmark(2, db_path=str(tmp_path / "b.sqlite"), now=FIXED_NOW)
+    assert b["repeats"] == 2
+    assert b["mode"] == "deterministic"
+    assert b["valid_records"] == 480
+    for key in ("min", "median", "max"):
+        assert b["elapsed_seconds"][key] > 0
+        assert b["records_per_second"][key] > 0
+    assert b["elapsed_seconds"]["min"] <= b["elapsed_seconds"]["median"] \
+        <= b["elapsed_seconds"]["max"]
+
+
+def test_benchmark_confirms_decisions_do_not_vary_across_runs(tmp_path):
+    """Only the clock may move between repeats."""
+    b = P.benchmark(3, db_path=str(tmp_path / "c.sqlite"), now=FIXED_NOW)
+    assert b["decisions_identical_across_runs"] is True
+    assert b["stage_seconds_median"]["match"] > 0

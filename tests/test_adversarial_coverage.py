@@ -170,3 +170,28 @@ def test_source_files_are_the_expected_size(rows):
     assert len(load_source(SOURCE_PURCHASE_REGISTER)) == 500
     assert len(load_source(SOURCE_GSTR2B)) == 490
     assert len(load_source(SOURCE_PRIOR_PERIOD)) == 75
+
+
+# --- the full case-type inventory ------------------------------------------
+
+ALL_CASE_TYPES = set(ADVERSARIAL_CASES) | {"clean_exact_match"}
+
+
+def test_all_14_case_types_are_present_in_the_frozen_split(frozen):
+    """The dataset injects 14 case types: 13 adversarial plus the clean
+    baseline. Every one must survive the split, or some behaviour is untested
+    on the numbers actually reported."""
+    present = {r["case_type"] for r in frozen}
+    assert len(ALL_CASE_TYPES) == 14
+    assert present == ALL_CASE_TYPES, ALL_CASE_TYPES - present
+
+
+def test_the_dataset_defines_exactly_those_14_case_types(rows):
+    assert {r["case_type"] for r in rows} == ALL_CASE_TYPES
+
+
+def test_thirteen_of_the_fourteen_are_adversarial():
+    """clean_exact_match is the baseline, not a trap — stated explicitly so
+    the 13/14 distinction is never mistaken for a missing case."""
+    assert len(ADVERSARIAL_CASES) == 13
+    assert "clean_exact_match" not in ADVERSARIAL_CASES
