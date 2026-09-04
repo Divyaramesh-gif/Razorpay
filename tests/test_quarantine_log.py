@@ -22,6 +22,11 @@ FIXED_TS = "2026-06-10T00:00:00+00:00"
 
 
 @pytest.fixture
+def db(tmp_path):
+    return str(tmp_path / "test.sqlite")
+
+
+@pytest.fixture
 def log(tmp_path):
     with QuarantineLog(str(tmp_path / "test.sqlite"), now=FIXED_TS) as q:
         yield q
@@ -131,15 +136,92 @@ def test_every_error_type_carries_a_distinct_message(log):
         assert entry.validation_message != entry.validation_error
 
 
-def test_reruns_do_not_duplicate_rows(log):
+def test_rewriting_a_row_in_the_same_run_is_refused(log):
+    """Append-only: a rejected record's evidence is never overwritten."""
+    from src.quarantine_log import QuarantineImmutableError
     _, invalid = V.partition(load_source(SOURCE_PURCHASE_REGISTER))
     log.quarantine_all(invalid)
-    log.quarantine_all(invalid)
+    with pytest.raises(QuarantineImmutableError, match="append-only"):
+        log.quarantine_all(invalid)
     assert log.count() == 20
 
 
-def test_clear_empties_the_table(log):
+def test_a_second_run_appends_beside_the_first(db):
+    """History survives: a later run must not erase why a record was rejected."""
+    from src.quarantine_log import ALL_RUNS
+    _, invalid = V.partition(load_source(SOURCE_PURCHASE_REGISTER))
+    with QuarantineLog(db, now=FIXED_TS) as first:
+        first.quarantine_all(invalid)
+        run_one = first.run_id
+    with QuarantineLog(db, now=FIXED_TS) as second:
+        second.quarantine_all(invalid)
+        assert second.run_id != run_one
+        assert second.count(ALL_RUNS) == 40
+        assert second.count() == 20
+        assert second.count(run_one) == 20
+        assert len(second.runs()) == 2
+
+
+def test_history_keeps_every_generation_of_a_record(db):
+    _, invalid = V.partition(load_source(SOURCE_PURCHASE_REGISTER))
+    for _ in range(3):
+        with QuarantineLog(db, now=FIXED_TS) as log:
+            log.quarantine_all(invalid)
+    with QuarantineLog(db) as log:
+        record_id = invalid[0].record.source_id
+        assert [h.run_sequence for h in log.history(record_id)] == [1, 2, 3]
+
+
+def test_reading_does_not_allocate_an_empty_run(db):
+    _, invalid = V.partition(load_source(SOURCE_PURCHASE_REGISTER))
+    with QuarantineLog(db, now=FIXED_TS) as log:
+        log.quarantine_all(invalid)
+    with QuarantineLog(db) as reader:
+        assert reader.run_id == "run-0001"
+        assert len(reader.runs()) == 1
+
+
+def test_the_pipeline_never_erases_the_quarantine_log():
+    import os
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    source = open(os.path.join(root, "src", "pipeline.py"), encoding="utf-8").read()
+    assert "qlog.clear()" not in source
+    assert "purge()" not in source
+
+
+def test_a_legacy_database_is_migrated_without_losing_rows(tmp_path):
+    import sqlite3
+    from src.quarantine_log import ALL_RUNS, LEGACY_RUN_ID
+
+    path = str(tmp_path / "legacy.sqlite")
+    conn = sqlite3.connect(path)
+    conn.executescript("""
+        CREATE TABLE quarantine_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, record_id TEXT NOT NULL,
+            source TEXT NOT NULL, source_record_id TEXT NOT NULL,
+            source_row_number INTEGER NOT NULL, validation_error TEXT NOT NULL,
+            validation_message TEXT NOT NULL, error_field TEXT NOT NULL,
+            raw_record_snapshot TEXT NOT NULL, timestamp TEXT NOT NULL);
+    """)
+    conn.execute(
+        "INSERT INTO quarantine_log (record_id, source, source_record_id, "
+        "source_row_number, validation_error, validation_message, error_field, "
+        "raw_record_snapshot, timestamp) VALUES "
+        "('old:PR-1','purchase_register','PR-1',1,'invalid_gstin_format','m',"
+        "'vendor_gstin','{}','2020-01-01')")
+    conn.commit()
+    conn.close()
+
+    with QuarantineLog(path, now=FIXED_TS) as log:
+        assert log.count(ALL_RUNS) == 1
+        assert log.entries(ALL_RUNS)[0].run_id == LEGACY_RUN_ID
+        assert log.snapshot("old:PR-1") == {}
+
+
+def test_purge_is_available_to_tests_only(log):
+    """purge() exists so a fixture can start clean — never for a run."""
+    from src.quarantine_log import ALL_RUNS
     _, invalid = V.partition(load_source(SOURCE_PURCHASE_REGISTER))
     log.quarantine_all(invalid)
-    log.clear()
-    assert log.count() == 0
+    log.purge()
+    assert log.count(ALL_RUNS) == 0

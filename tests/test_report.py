@@ -441,3 +441,34 @@ def test_the_stale_no_ui_claim_is_gone(frozen):
     """A dashboard exists now; the report must not still say otherwise."""
     text = R.render(frozen)
     assert "No UI" not in text
+
+
+# --- SUBMISSION.md must not drift from the pipeline ------------------------
+
+def test_submission_doc_numbers_match_the_report(frozen):
+    """A submission that quotes stale figures is worse than none."""
+    import os
+    path = os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), "SUBMISSION.md")
+    text = open(path, encoding="utf-8").read()
+
+    mr = frozen.match_rate
+    assert f"{100 * mr.rate:.1f}%" in text
+    assert f"{mr.resolved}/{mr.total}" in text
+    assert f"{mr.exact} exact, {mr.fuzzy} fuzzy, {mr.rule_classified} rule-classified" in text
+    assert f"{frozen.indeterminate}" in text
+    assert f"{frozen.quarantined}" in text
+    assert f"{frozen.accuracy.correct}/{frozen.accuracy.total}" in text
+    assert f"{frozen.suppliers_total} suppliers" in text
+
+
+def test_submission_doc_carries_the_disclaimers(frozen):
+    import os
+    path = os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), "SUBMISSION.md")
+    text = open(path, encoding="utf-8").read()
+    assert "synthetic GSTR-2B-style data" in text
+    assert "No live GSTN connectivity" in text
+    assert "Not tax advice" in text
+    assert "live AI path is unverified" in text.lower() or \
+        "The live AI path is unverified" in text

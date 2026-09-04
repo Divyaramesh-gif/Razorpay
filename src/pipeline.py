@@ -235,8 +235,9 @@ def run(db_path: str = DEFAULT_DB_PATH,
     _t0 = time.perf_counter()
     _mark = _t0
 
+    # APPEND-ONLY, like the audit log: a rejected record's evidence is not a
+    # later run's to erase.
     with QuarantineLog(db_path, now=now) as qlog:
-        qlog.clear()
         for source in sources:
             records = load_source(source)
             records_read[source] = len(records)

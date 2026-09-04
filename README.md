@@ -9,6 +9,8 @@ AI-assisted normalisation. Deterministic decisions. Auditable human review.
 > calibrated confidence gate. No live GSTN connectivity. Not tax advice.
 > See [Limitations](#limitations) before quoting any figure.
 
+Submission write-up: [SUBMISSION.md](SUBMISSION.md).
+
 The system architecture is **locked** at `Architecture_v2_FINAL.pdf`. That document
 is the source of truth; this README restates it and records what was built.
 Section references (§) point into it.
@@ -38,7 +40,7 @@ python3 -m src.pipeline --benchmark 3             # stable throughput (median of
 python3 -m src.pipeline --compare-ai              # deterministic vs AI-assisted
 python3 -m src.report                             # §2.7 report on the frozen 30%
 python3 -m src.dashboard                          # dashboard at http://127.0.0.1:8000
-python3 -m pytest tests/ -q                       # 578 tests
+python3 -m pytest tests/ -q                       # 588 tests
 ```
 
 `python3 calibrate.py --report-frozen` re-derives the confidence threshold.
