@@ -279,8 +279,10 @@ def run(db_path: str = DEFAULT_DB_PATH,
     _mark = time.perf_counter()
 
     # ---- §2.7 audit log --------------------------------------------------
+    # APPEND-ONLY (§2.7): each run adds a generation of audit rows beside the
+    # ones already there. The pipeline never clears the log — an audit trail a
+    # run can erase is not an audit trail.
     with AuditLog(db_path, now=now) as alog:
-        alog.clear()
         audit_entries = alog.record_all(decisions, evidences)
     stage_seconds["audit_log"] = time.perf_counter() - _mark
 

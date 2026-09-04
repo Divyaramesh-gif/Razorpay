@@ -404,6 +404,13 @@ is stubbed to look like an upload that does not work.</p></div>"""
                           'No substitute has been derived.</p>')
 
     mr = report.match_rate
+    scope_note = (
+        f'<p class="note"><strong>Scope.</strong> Precision and coverage are '
+        f'<strong>{esc(report.split)}</strong> ({report.scored} records). '
+        f'Estimated ITC exposure and the supplier counts are '
+        f'<strong>whole batch</strong> ({report.batch_scored} scored records) — '
+        f'DRC-01C variance is cumulative per supplier and does not split. '
+        f'Throughput covers the whole batch run.</p>')
     metrics = (
         precision_tile
         + tile("Coverage (resolved)", f"{100 * mr.rate:.1f}%",
@@ -411,6 +418,7 @@ is stubbed to look like an upload that does not work.</p></div>"""
         + tile("Throughput", f"{t['records_per_second']:.1f}/s",
                f"{t['elapsed_seconds']:.2f}s · {t['valid_records']} valid records")
         + tile("Estimated ITC exposure", money(report.itc_exposure_total),
+               f"WHOLE BATCH ({report.batch_scored} scored) · "
                f"{money(report.itc_exposure_breaching)} with "
                f"{report.suppliers_breaching_drc01c} supplier(s) over DRC-01C")
     )
@@ -462,7 +470,7 @@ descending. That ordering uses existing figures only; no severity score is
 invented. Showing the first {min(60, len(state.queue))}.</p>
 <div class="scroll"><table><thead><tr><th>Record</th><th>Invoice</th>
 <th>Outcome</th><th>Rule</th><th class="num">Confidence</th>
-<th class="num">ITC at risk</th><th>Operational</th></tr></thead>
+<th class="num">ITC at risk<br><span style="font-weight:400;text-transform:none">per record</span></th><th>Operational</th></tr></thead>
 <tbody>{rows}</tbody></table></div></div>"""
 
     # --- quarantine ------------------------------------------------------
@@ -494,7 +502,7 @@ own values; TXT is the §2.7 evaluation report verbatim.</p></div>"""
 <h2>Gate outcomes</h2><div class="panel">
 <div class="bar">{segs}</div><div class="legend">{legend}</div></div>
 <div class="tiles" style="margin-top:10px">{otiles}</div>
-<h2>Metrics</h2><div class="tiles">{metrics}</div>{precision_note}
+<h2>Metrics</h2><div class="tiles">{metrics}</div>{scope_note}{precision_note}
 <h2>Normalisation mode</h2><div class="panel">{ai_box}</div>
 {queue_panel}{quarantine_panel}{batch}{exports}""")
 
@@ -560,8 +568,11 @@ def render_record(state: DashboardState, record_id: str) -> Optional[str]:
 <dt>action</dt><dd>{badge(audit.action)}</dd>
 <dt>rule_id_fired</dt><dd><code>{esc(audit.rule_id_fired or 'null')}</code></dd>
 <dt>confidence_score</dt><dd>{esc(audit.confidence_score)}</dd>
+<dt>run</dt><dd><code>{esc(audit.run_id)}</code> (sequence
+ {esc(audit.run_sequence)}) — the log is append-only; earlier runs are kept</dd>
 <dt>reviewer_decision</dt><dd><code>{esc(audit.reviewer_decision or 'null')}</code>
- — nullable; the pipeline never writes it</dd>
+ — resolved from the append-only reviewer-event log; the pipeline never writes it,
+ and this dashboard is read-only</dd>
 <dt>timestamp</dt><dd><code>{esc(audit.timestamp)}</code></dd>
 <dt>evidence_snapshot</dt><dd>{len(audit.evidence_snapshot)} bytes of JSON,
  logged verbatim</dd></dl>"""

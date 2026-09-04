@@ -217,11 +217,103 @@ def test_one_row_per_record(log):
     assert log.count() == 5
 
 
-def test_reruns_do_not_duplicate_rows(log):
+def test_rewriting_a_row_in_the_same_run_is_refused(log):
+    """Append-only: an audit row is never overwritten in place."""
+    from src.audit_log import AuditImmutableError
     pairs = [decide(rid=f"PR-{i:04d}") for i in range(1, 4)]
-    for _ in range(2):
+    log.record_all([d for d, _ in pairs], [e for _, e in pairs])
+    with pytest.raises(AuditImmutableError, match="append-only"):
         log.record_all([d for d, _ in pairs], [e for _, e in pairs])
     assert log.count() == 3
+
+
+def test_a_second_run_appends_beside_the_first(db):
+    """Historical runs survive: re-running adds a generation of rows."""
+    from src.audit_log import ALL_RUNS
+    pairs = [decide(rid=f"PR-{i:04d}") for i in range(1, 4)]
+    with AuditLog(db, now=FIXED_TS) as first:
+        first.record_all([d for d, _ in pairs], [e for _, e in pairs])
+        run_one = first.run_id
+    with AuditLog(db, now=FIXED_TS) as second:
+        second.record_all([d for d, _ in pairs], [e for _, e in pairs])
+        run_two = second.run_id
+        assert run_two != run_one
+        assert second.count(ALL_RUNS) == 6
+        assert second.count(run_one) == 3
+        assert second.count(run_two) == 3
+        assert [r["run_id"] for r in second.runs()] == [run_one, run_two]
+
+
+def test_history_keeps_every_generation_of_a_record(db):
+    pairs = [decide(rid="PR-0001")]
+    for _ in range(3):
+        with AuditLog(db, now=FIXED_TS) as log:
+            log.record_all([d for d, _ in pairs], [e for _, e in pairs])
+    with AuditLog(db) as log:
+        history = log.history("purchase_register:PR-0001")
+        assert len(history) == 3
+        assert [h.run_sequence for h in history] == [1, 2, 3]
+
+
+def test_the_pipeline_never_erases_the_audit_log():
+    """Structural: purge() is a test fixture, not something a run may call."""
+    import os
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    source = open(os.path.join(root, "src", "pipeline.py"), encoding="utf-8").read()
+    assert "alog.clear()" not in source
+    assert "purge()" not in source
+
+
+def test_reviewer_decisions_are_appended_not_edited(log):
+    """A reviewer event never mutates the audit row it refers to."""
+    decision, ev = decide(taxable_value="83271.44")
+    log.record(decision, ev)
+    rid = "purchase_register:PR-0001"
+
+    log.record_reviewer_decision(rid, "accepted_2b_value", reviewer="asha")
+    log.record_reviewer_decision(rid, "escalated", reviewer="ravi", note="disputed")
+
+    events = log.reviewer_events(rid)
+    assert [e.reviewer_decision for e in events] == ["accepted_2b_value", "escalated"]
+    assert [e.reviewer for e in events] == ["asha", "ravi"]
+    # latest wins on read
+    assert log.entry(rid).reviewer_decision == "escalated"
+    # the stored audit column is never written
+    stored = log._conn.execute(
+        "SELECT reviewer_decision FROM audit_log WHERE record_id = ?",
+        (rid,)).fetchall()
+    assert [row[0] for row in stored] == [None]
+
+
+def test_a_legacy_database_is_migrated_without_losing_rows(tmp_path):
+    """History predating run scoping must survive the schema change."""
+    import sqlite3
+    from src.audit_log import ALL_RUNS, LEGACY_RUN_ID
+
+    path = str(tmp_path / "legacy.sqlite")
+    conn = sqlite3.connect(path)
+    conn.executescript("""
+        CREATE TABLE audit_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            record_id TEXT NOT NULL UNIQUE, invoice_id TEXT NOT NULL,
+            evidence_snapshot TEXT NOT NULL, rule_id_fired TEXT, category TEXT,
+            confidence_score REAL NOT NULL, action TEXT NOT NULL,
+            reviewer_decision TEXT, reason TEXT NOT NULL, timestamp TEXT NOT NULL);
+    """)
+    conn.execute(
+        "INSERT INTO audit_log (record_id, invoice_id, evidence_snapshot, "
+        "confidence_score, action, reviewer_decision, reason, timestamp) "
+        "VALUES ('old:PR-1','INV-1','{}',88.0,'indeterminate','kept','r','2020-01-01')")
+    conn.commit()
+    conn.close()
+
+    with AuditLog(path, now=FIXED_TS) as log:
+        assert log.count(ALL_RUNS) == 1
+        entry = log.entry("old:PR-1")
+        assert entry.run_id == LEGACY_RUN_ID
+        # the in-place legacy decision is preserved as the event it should have been
+        assert entry.reviewer_decision == "kept"
+        assert log.reviewer_events("old:PR-1")[0].run_id == LEGACY_RUN_ID
 
 
 def test_counts_by_action_and_rule(log):
@@ -251,8 +343,11 @@ def test_batch_rejects_mismatched_inputs(log):
         log.record_all([decision], [])
 
 
-def test_clear_empties_the_table(log):
+def test_purge_is_available_to_tests_only(log):
+    """purge() exists so a fixture can start clean — never for a run."""
+    from src.audit_log import ALL_RUNS
     decision, ev = decide()
     log.record(decision, ev)
-    log.clear()
-    assert log.count() == 0
+    log.purge()
+    assert log.count(ALL_RUNS) == 0
+    assert log.reviewer_events() == []

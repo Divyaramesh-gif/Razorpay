@@ -394,3 +394,50 @@ def test_to_dict_carries_positioning_and_exposure(frozen):
     assert payload["positioning"]["supporting_line"] == R.SUPPORTING_LINE
     assert "synthetic GSTR-2B-style data" in payload["positioning"]["scope"]
     assert payload["itc_exposure"]["total"] == frozen.itc_exposure_total
+
+
+# --- ITC exposure scope labelling ------------------------------------------
+# The report is frozen-split, but DRC-01C variance is cumulative per supplier
+# across the WHOLE batch. An unlabelled figure invites the wrong reading.
+
+def test_itc_exposure_is_labelled_whole_batch(frozen):
+    text = R.render(frozen)
+    assert "WHOLE BATCH" in text
+    assert f"({frozen.batch_scored} scored" in text
+    assert "not the frozen_test split" in text
+
+
+def test_drc01c_section_separates_split_counts_from_batch_totals(frozen):
+    text = R.render(frozen)
+    assert "record counts below are frozen_test" in text
+    assert "suppliers over the trigger (whole batch)" in text
+
+
+def test_itc_exposure_scope_is_machine_readable(frozen):
+    payload = R.to_dict(frozen)["itc_exposure"]
+    assert payload["scope"] == "whole_batch"
+    assert "whole batch" in payload["scope_note"]
+    assert "cumulative per supplier" in payload["scope_note"]
+    assert payload["batch_scored"] == frozen.batch_scored
+
+
+def test_batch_scored_is_the_whole_batch_not_the_split(result, splits):
+    report = R.build_report(result, splits, R.FROZEN_TEST)
+    assert report.batch_scored == result.scored == 480
+    assert report.scored == 145
+    assert report.batch_scored > report.scored
+
+
+# --- limitation is current, not stale --------------------------------------
+
+def test_human_review_limitation_describes_the_dashboard(frozen):
+    text = R.render(frozen)
+    assert "local read-only dashboard" in text
+    assert "no reviewer write-back" in text
+    assert "no assignment" in text and "no escalation" in text
+
+
+def test_the_stale_no_ui_claim_is_gone(frozen):
+    """A dashboard exists now; the report must not still say otherwise."""
+    text = R.render(frozen)
+    assert "No UI" not in text

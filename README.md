@@ -38,7 +38,7 @@ python3 -m src.pipeline --benchmark 3             # stable throughput (median of
 python3 -m src.pipeline --compare-ai              # deterministic vs AI-assisted
 python3 -m src.report                             # §2.7 report on the frozen 30%
 python3 -m src.dashboard                          # dashboard at http://127.0.0.1:8000
-python3 -m pytest tests/ -q                       # 564 tests
+python3 -m pytest tests/ -q                       # 578 tests
 ```
 
 `python3 calibrate.py --report-frozen` re-derives the confidence threshold.
@@ -349,10 +349,10 @@ document that qualifies it.
 | **Throughput is indicative** | One machine, single-threaded, no cache. Matching is O(PR × 2B). |
 | **Synthetic DRC-01C trigger** | ₹75,000, not the statutory ₹25 lakh — which no invoice here approaches. |
 | **Not a filing tool, not tax advice** | Nothing files or amends a return. Rule IDs are a triage aid covering this dataset's defect patterns, not the statutory surface. |
-| **Human review is a queue** | `reviewer_decision` is nullable and `pending_review()` lists what waits. No UI, assignment or escalation. |
+| **Human review is a queue** | Local read-only dashboard: no upload, no reviewer write-back, no assignment, no escalation. `pending_review()` lists what waits; decisions are appended via `audit_log.record_reviewer_decision()` outside the UI. |
 | **Matcher is not perfect** | Deliberately ambiguous records are the weak spot; every outcome error traces to a matcher miss there, not a rule misfiring. |
 | **Live AI path unverified** | `normalize_ai_assisted()` has never made a real API call — no credentials in any build environment. Contract, gating and fallback are tested offline; the call itself is not. |
-| **Dashboard is local and read-only** | `python3 -m src.dashboard` serves on localhost with no auth, no persistence beyond the pipeline's own logs, and no batch upload. It reviews a run; it cannot record a reviewer's decision back. |
+| **Dashboard is local and read-only** | `python3 -m src.dashboard` serves on localhost with no auth and no batch upload. It reviews a run; it cannot write a reviewer's decision back. |
 
 ## Scope boundaries — what this is NOT
 

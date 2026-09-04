@@ -163,6 +163,10 @@ class EvaluationReport:
     suppliers_total: int
     itc_exposure_total: float = 0.0
     itc_exposure_breaching: float = 0.0
+    # ITC exposure and supplier counts are WHOLE BATCH, not split-scoped:
+    # DRC-01C variance is cumulative per supplier across the batch.
+    itc_exposure_scope: str = "whole_batch"
+    batch_scored: int = 0
     throughput: Dict[str, float] = field(default_factory=dict)
     ai_stats: Dict[str, int] = field(default_factory=dict)
     ai_assisted: bool = False
@@ -309,6 +313,7 @@ def build_report(result: PipelineResult,
         accuracy=accuracy,
         rules_version=result.rules_version,
         dataset_seed=dataset_seed,
+        batch_scored=result.scored,
         itc_exposure_total=round(sum(result.batch.itc_variance_by_gstin.values()), 2),
         itc_exposure_breaching=round(sum(
             v for g, v in result.batch.itc_variance_by_gstin.items()
@@ -369,9 +374,11 @@ LIMITATIONS = [
     "  recognise the defect patterns this dataset contains, not the full",
     "  statutory surface.",
     "",
-    "* HUMAN REVIEW IS A QUEUE, NOT A WORKFLOW. reviewer_decision is nullable",
-    "  and pending_review() lists what is waiting. No UI, assignment or",
-    "  escalation exists.",
+    "* HUMAN REVIEW IS A QUEUE, NOT A WORKFLOW. A local read-only dashboard",
+    "  (python3 -m src.dashboard) shows the queue and the evidence behind each",
+    "  record: no upload, no reviewer write-back, no assignment, no escalation.",
+    "  Reviewer decisions are appended through",
+    "  audit_log.record_reviewer_decision() outside the UI.",
     "",
     "* MATCHER ACCURACY IS NOT PERFECT. Deliberately ambiguous records are",
     "  the weak spot; every outcome error traces to a matcher miss on one of",
@@ -419,6 +426,9 @@ def render(report: EvaluationReport) -> str:
     add(f"                      Rs.{report.itc_exposure_breaching:,.2f} of it "
         f"with the {report.suppliers_breaching_drc01c} supplier(s) over the "
         f"DRC-01C trigger")
+    add(f"                      SCOPE: WHOLE BATCH ({report.batch_scored} scored "
+        f"records), not the {report.split} split. DRC-01C is cumulative per")
+    add(f"                      supplier, so a per-split figure would understate it.")
     add("")
 
     # -- 1. match rate, broken out ----------------------------------------
@@ -466,9 +476,12 @@ def render(report: EvaluationReport) -> str:
         add(f"       {status:<36} {report.operational_88d.get(status, 0):>4}")
     add("")
     add("   OPS-DRC01C cumulative ITC variance vs auto-notice trigger")
+    add(f"       record counts below are {report.split}; the supplier totals")
+    add(f"       and the ITC exposure are WHOLE BATCH — the variance is")
+    add(f"       cumulative per supplier and does not split.")
     for status in (STATUS_BREACHED, STATUS_WITHIN_THRESHOLD):
         add(f"       {status:<36} {report.operational_drc01c.get(status, 0):>4}")
-    add(f"       {'suppliers over the trigger':<36} "
+    add(f"       {'suppliers over the trigger (whole batch)':<36} "
         f"{report.suppliers_breaching_drc01c:>4} of {report.suppliers_total}")
 
     # -- 4. indeterminate --------------------------------------------------
@@ -661,6 +674,11 @@ def to_dict(report: EvaluationReport) -> dict:
         "scope": " ".join(SCOPE_QUALIFIER),
     }
     payload["itc_exposure"] = {
+        "scope": report.itc_exposure_scope,
+        "scope_note": (f"whole batch ({report.batch_scored} scored records); "
+                       f"NOT the {report.split} split — DRC-01C variance is "
+                       f"cumulative per supplier"),
+        "batch_scored": report.batch_scored,
         "total": report.itc_exposure_total,
         "with_breaching_suppliers": report.itc_exposure_breaching,
         "suppliers_total": report.suppliers_total,

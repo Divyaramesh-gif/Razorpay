@@ -498,3 +498,45 @@ def test_ai_run_reports_fallback_when_no_credentials(live):
         assert state.result.ai_applied >= 0
     # whichever path ran, decisions are unchanged
     assert state.result.scored == 480 or state.result.scored > 0
+
+
+# --------------------------------------------------------------------------
+# ITC exposure scope, and the append-only audit log
+# --------------------------------------------------------------------------
+
+def test_itc_exposure_tile_is_labelled_whole_batch(live):
+    base, app = live
+    _, body = fetch(base, "/")
+    assert "WHOLE BATCH" in body
+    assert f"({app.state.report.batch_scored} scored)" in body
+
+
+def test_scope_note_separates_split_metrics_from_batch_metrics(live):
+    _, body = fetch(live[0], "/")
+    assert "whole batch" in body
+    assert "does not split" in body
+    assert "frozen_test" in body
+
+
+def test_record_page_shows_the_run_and_append_only_nature(live, samples):
+    base, _ = live
+    _, body = fetch(base, "/record?id=" + urllib.parse.quote(samples["exact"]))
+    assert "append-only" in body
+    assert "read-only" in body
+
+
+def test_dashboard_never_writes_to_the_audit_log():
+    """It is a read-only view: no reviewer write-back, by construction."""
+    source = open(os.path.join(REPO, "src", "dashboard.py"), encoding="utf-8").read()
+    for forbidden in ("record_reviewer_decision", "AuditLog(", ".purge()",
+                      "INSERT", "UPDATE", "DELETE"):
+        assert forbidden not in source, f"dashboard.py contains {forbidden}"
+
+
+def test_dashboard_reports_only_this_runs_audit_rows(live):
+    """The audit log accumulates across runs; the page must not."""
+    base, app = live
+    _, body = fetch(base, "/export/audit.csv")
+    rows = list(csv.DictReader(io.StringIO(body)))
+    assert len(rows) == app.state.result.scored
+    assert len({e.run_id for e in app.state.result.audit_entries}) == 1

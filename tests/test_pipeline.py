@@ -95,7 +95,7 @@ def test_quarantine_is_not_a_gate_outcome(result):
 
 def test_both_logs_are_written_as_separate_tables(result):
     with AuditLog(result.db_path) as alog:
-        assert {"audit_log", "quarantine_log"} <= set(alog.tables())
+        assert {"audit_log", "quarantine_log", "reviewer_events"} <= set(alog.tables())
         assert alog.count() == result.scored
     with QuarantineLog(result.db_path) as qlog:
         assert qlog.count() == result.quarantined_count
@@ -160,14 +160,34 @@ def test_fingerprint_changes_when_a_decision_changes(tmp_path, result):
     assert P.fingerprint(different) != P.fingerprint(result)
 
 
-def test_rerunning_replaces_rather_than_accumulates(tmp_path):
+def test_rerunning_appends_audit_history_rather_than_erasing_it(tmp_path):
+    """§2.7 audit log is APPEND-ONLY: a second run must not delete the first."""
+    from src.audit_log import ALL_RUNS
+
     db = str(tmp_path / "same.sqlite")
-    P.run(db_path=db, now=FIXED_NOW)
-    P.run(db_path=db, now=FIXED_NOW)
+    first = P.run(db_path=db, now=FIXED_NOW)
+    second = P.run(db_path=db, now=FIXED_NOW)
+
     with AuditLog(db) as alog:
-        assert alog.count() == 480
+        assert alog.count(ALL_RUNS) == 960          # both runs kept
+        assert alog.count() == 480                  # latest run alone
+        assert len(alog.runs()) == 2
+        assert len(alog.history(first.decisions[0].record_id)) == 2
+    # the quarantine log is per-batch and is not part of this change
     with QuarantineLog(db) as qlog:
         assert qlog.count() == 20
+    # and the decisions themselves are untouched
+    assert P.fingerprint(first) == P.fingerprint(second)
+
+
+def test_the_in_memory_result_is_scoped_to_this_run(tmp_path):
+    """Report and dashboard read result.audit_entries, so a growing log must
+    not inflate what a single run reports."""
+    db = str(tmp_path / "scoped.sqlite")
+    P.run(db_path=db, now=FIXED_NOW)
+    second = P.run(db_path=db, now=FIXED_NOW)
+    assert len(second.audit_entries) == second.scored == 480
+    assert len({e.run_id for e in second.audit_entries}) == 1
 
 
 # --- the pipeline is label-blind ------------------------------------------
