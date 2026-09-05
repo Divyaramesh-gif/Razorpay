@@ -350,29 +350,52 @@ def render_home(state: DashboardState) -> str:
     # The prior-period snapshot is read by the rule engine (§2.5) rather than
     # reconciled, so it is absent from records_read. Showing a dash made a file
     # that IS read look skipped.
+    def rel(path: str) -> str:
+        return path.replace(os.sep, "/").split("Razorpay/")[-1]
+
+    # The two reconciled files are the batch. The prior-period snapshot is a
+    # REFERENCE the rule engine consults (§2.5) — it is listed separately and
+    # is deliberately NOT part of the batch total, because nothing in it is
+    # scored, matched or counted.
     roles = {
-        SOURCE_PURCHASE_REGISTER: "reconciled — the claim side",
-        SOURCE_GSTR2B: "reconciled — the counterparty side",
-        SOURCE_PRIOR_PERIOD: "consulted by the rule engine (§2.5), not reconciled",
+        SOURCE_PURCHASE_REGISTER: "the claim side — scored",
+        SOURCE_GSTR2B: "the counterparty side — matched against, not scored",
     }
     sources = ""
-    for name, path in PIPELINE_SOURCES.items():
-        rows = result.records_read.get(name)
-        if rows is None:
-            rows = len(load_source(name))
+    for name in (SOURCE_PURCHASE_REGISTER, SOURCE_GSTR2B):
         sources += (
-            f'<tr><td><code>{esc(path.replace(os.sep, "/").split("Razorpay/")[-1])}'
-            f"</code></td>"
-            f'<td class="num">{rows:,}</td>'
-            f"<td>{esc(roles.get(name, ''))}</td></tr>")
+            f'<tr><td><code>{esc(rel(PIPELINE_SOURCES[name]))}</code></td>'
+            f'<td class="num">{result.records_read.get(name, 0):,}</td>'
+            f"<td>{esc(roles[name])}</td></tr>")
+    sources += (
+        f'<tr style="border-top:2px solid var(--line)">'
+        f'<td><strong>Batch total</strong></td>'
+        f'<td class="num"><strong>{total:,}</strong></td>'
+        f'<td>rows read and reconciled</td></tr>')
+
+    prior_rows = len(load_source(SOURCE_PRIOR_PERIOD))
+    prior_panel = f"""<div class="scroll" style="margin-top:14px">
+<table><thead><tr><th>Reference snapshot (not part of the batch)</th>
+<th class="num">Rows</th><th>Role</th></tr></thead><tbody>
+<tr><td><code>{esc(rel(PIPELINE_SOURCES[SOURCE_PRIOR_PERIOD]))}</code></td>
+<td class="num">{prior_rows:,}</td>
+<td>prior-period GSTR-2B, consulted by the rule engine (§2.5)</td></tr>
+</tbody></table></div>
+<p class="note">The prior-period snapshot is <strong>looked up, never
+scored</strong>: it is the single signal that separates an invoice removed
+after the claim (present in it) from a late-filed supplier (absent from it).
+Its {prior_rows:,} rows are <strong>not</strong> included in the
+{total:,}-row batch total above.</p>"""
+
     batch = f"""<h2>Batch</h2><div class="panel">
 <div class="scroll"><table><thead><tr><th>Source file</th>
 <th class="num">Rows read</th><th>Role</th></tr></thead>
 <tbody>{sources}</tbody></table></div>
+{prior_panel}
 <div class="row" style="margin-top:12px">
-  <form method="post" action="/run"><button class="btn" type="submit">Run batch</button></form>
+  <form method="post" action="/run"><button class="btn" type="submit">Run current demo batch</button></form>
   <form method="post" action="/run"><input type="hidden" name="ai" value="1">
-    <button class="btn sec" type="submit">Run with AI-assisted normalisation</button></form>
+    <button class="btn sec" type="submit">Run current batch with AI-assisted normalisation</button></form>
 </div>
 <p class="note"><strong>Upload is not offered.</strong> The pipeline reads the
 fixed source files above; accepting an arbitrary batch would require changing
@@ -388,19 +411,24 @@ is stubbed to look like an upload that does not work.</p></div>"""
     b2_rows = result.records_read.get(SOURCE_GSTR2B, 0)
     tiles = (
         tile("Total rows read", f"{total:,}",
-             f"{register_rows:,} register + {b2_rows:,} GSTR-2B")
-        + tile("Valid (scored)", f"{scored:,}",
-               f"{100 * scored / register_rows:.1f}% of the {register_rows:,} "
-               f"register records" if register_rows else "")
+             f"{register_rows:,} purchase-register records matched against "
+             f"{b2_rows:,} GSTR-2B rows")
+        + tile("Valid purchase records scored", f"{scored:,}",
+               f"of {register_rows:,} purchase-register records "
+               f"({100 * scored / register_rows:.1f}%)" if register_rows else "")
         + tile("Quarantined", f"{quarantined:,}",
-               f"{100 * quarantined / register_rows:.1f}% of the register — "
-               f"failed input validation" if register_rows else
-               "failed input validation")
+               f"of {register_rows:,} purchase-register records "
+               f"({100 * quarantined / register_rows:.1f}%) — failed input "
+               f"validation" if register_rows else "failed input validation")
     )
     records_note = (
-        '<p class="note">Only purchase-register records are scored; GSTR-2B is '
-        'the counterparty side they are matched against. A register record is '
-        'either scored or quarantined — never both, never neither.</p>')
+        f'<p class="note"><strong>How to read these.</strong> The batch is '
+        f'{register_rows:,} purchase-register records checked against '
+        f'{b2_rows:,} GSTR-2B rows — {total:,} rows in total. Only the '
+        f'purchase-register side is scored: each of its records is either '
+        f'scored ({scored:,}) or quarantined ({quarantined:,}), never both and '
+        f'never neither. The GSTR-2B rows are the counterparty evidence those '
+        f'records are matched against, so they are read but not scored.</p>')
 
     # --- outcome distribution -------------------------------------------
     segs, legend, otiles = "", "", ""
@@ -498,6 +526,12 @@ is stubbed to look like an upload that does not work.</p></div>"""
                  f'<td>{flag} {drc}</td></tr>')
 
     queue_panel = f"""<h2>Exception &amp; review queue</h2><div class="panel">
+<p class="note" style="margin-top:0"><strong>This queue is read-only.</strong>
+It shows what needs a human and the evidence behind each record. Decisions
+cannot be recorded here — there is no reviewer write-back, no assignment and no
+escalation in this layer. A reviewer decision is appended outside the UI, via
+<code>audit_log.record_reviewer_decision()</code>, and the audit log is
+append-only.</p>
 <p class="note" style="margin-top:0">{len(state.queue)} record(s) not
 auto-reconciled. Ordered by <strong>review risk</strong>: Rule 88D window
 closed first, then still open, then not applicable — each group by ITC at risk,

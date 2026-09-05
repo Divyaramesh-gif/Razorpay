@@ -102,7 +102,7 @@ python3 data/generate_dataset.py                # regenerate data (31 checks)
 python3 -m src.pipeline --verify-reproducible   # run twice, compare fingerprints
 python3 -m src.report                           # the frozen-set evaluation report
 python3 -m src.dashboard                        # dashboard at 127.0.0.1:8000
-python3 -m pytest tests/ -q                     # 595 tests
+python3 -m pytest tests/ -q                     # 603 tests
 ```
 
 Everything is offline and deterministic. `data/generate_dataset.py` rebuilds
@@ -161,5 +161,5 @@ src/pipeline.py             end-to-end orchestration (label-blind)
 src/report.py               §2.7 evaluation report
 src/dashboard.py            local read-only dashboard
 calibrate.py                §2.6 calibration (evaluation-side)
-tests/                      595 tests
+tests/                      603 tests
 ```

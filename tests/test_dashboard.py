@@ -526,11 +526,55 @@ def test_record_page_shows_the_run_and_append_only_nature(live, samples):
 
 
 def test_dashboard_never_writes_to_the_audit_log():
-    """It is a read-only view: no reviewer write-back, by construction."""
-    source = open(os.path.join(REPO, "src", "dashboard.py"), encoding="utf-8").read()
-    for forbidden in ("record_reviewer_decision", "AuditLog(", ".purge()",
-                      "INSERT", "UPDATE", "DELETE"):
-        assert forbidden not in source, f"dashboard.py contains {forbidden}"
+    """It is a read-only view: no reviewer write-back, by construction.
+
+    Checked against the SYNTAX TREE, not the raw text: the page legitimately
+    names `audit_log.record_reviewer_decision()` in prose, to tell a reviewer
+    where decisions are appended. Naming it is fine; calling it is not.
+    """
+    import ast
+
+    tree = ast.parse(open(os.path.join(REPO, "src", "dashboard.py"),
+                          encoding="utf-8").read())
+
+    called, constructed = set(), set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute):
+            called.add(node.attr)
+        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            constructed.add(node.func.id)
+
+    for forbidden in ("record_reviewer_decision", "purge", "execute",
+                      "executescript", "commit"):
+        assert forbidden not in called, f"dashboard.py CALLS {forbidden}()"
+    for forbidden in ("AuditLog", "QuarantineLog"):
+        assert forbidden not in constructed, \
+            f"dashboard.py constructs {forbidden}"
+
+    # No SQL write statement in any string literal either.
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            upper = node.value.upper()
+            for statement in ("INSERT INTO", "UPDATE ", "DELETE FROM"):
+                assert statement not in upper, \
+                    f"dashboard.py contains SQL: {statement}"
+
+
+def test_the_read_only_guard_would_catch_a_real_write(tmp_path):
+    """The guard above is only worth having if it fails on an actual call."""
+    import ast
+
+    sneaky = tmp_path / "sneaky.py"
+    sneaky.write_text("def f(log):\n    log.record_reviewer_decision('x', 'y')\n")
+    called = {n.attr for n in ast.walk(ast.parse(sneaky.read_text()))
+              if isinstance(n, ast.Attribute)}
+    assert "record_reviewer_decision" in called
+
+    innocent = tmp_path / "innocent.py"
+    innocent.write_text('NOTE = "appended via audit_log.record_reviewer_decision()"\n')
+    called = {n.attr for n in ast.walk(ast.parse(innocent.read_text()))
+              if isinstance(n, ast.Attribute)}
+    assert "record_reviewer_decision" not in called
 
 
 def test_dashboard_reports_only_this_runs_audit_rows(live):
@@ -546,9 +590,22 @@ def test_dashboard_reports_only_this_runs_audit_rows(live):
 # Denominators and labels that were misleading on first read
 # --------------------------------------------------------------------------
 
+def test_scored_tile_names_the_purchase_register(live):
+    """'Valid (scored)' did not say what was scored. The tile must name the
+    population so 480 cannot be read against the wrong denominator."""
+    base, app = live
+    _, body = fetch(base, "/")
+    from src.source_records import SOURCE_PURCHASE_REGISTER
+    register = app.state.result.records_read[SOURCE_PURCHASE_REGISTER]
+
+    assert "Valid purchase records scored" in body
+    assert f"of {register:,} purchase-register records" in body
+    assert "Valid (scored)" not in body
+
+
 def test_score_rate_is_against_the_scorable_population(live):
-    """Only register records are scored. Expressing 480 against all 990 rows
-    read implied half the batch was rejected — the opposite of the truth."""
+    """Expressing 480 against every row read implied half the batch was
+    rejected — the opposite of the truth."""
     base, app = live
     _, body = fetch(base, "/")
     from src.source_records import SOURCE_PURCHASE_REGISTER
@@ -556,16 +613,37 @@ def test_score_rate_is_against_the_scorable_population(live):
     scored = app.state.result.scored
     quarantined = app.state.result.quarantined_count
 
-    assert f"{100 * scored / register:.1f}% of the {register:,} register records" in body
-    assert f"{100 * quarantined / register:.1f}% of the register" in body
-    # the old, misleading denominator must not reappear
+    assert f"({100 * scored / register:.1f}%)" in body
+    assert f"({100 * quarantined / register:.1f}%)" in body
     assert f"{100 * scored / app.state.result.total_read:.1f}% of rows read" not in body
 
 
-def test_records_panel_explains_which_side_is_scored(live):
-    _, body = fetch(live[0], "/")
-    assert "Only purchase-register records are scored" in body
-    assert "counterparty side" in body
+def test_records_note_explains_both_counts_in_words(live):
+    """The subtitle used to be a bare percentage. It must now say what the
+    two files are and why only one of them is scored."""
+    import re
+    base, app = live
+    _, body = fetch(base, "/")
+    flat = re.sub(r"\s+", " ", body)
+    from src.source_records import SOURCE_GSTR2B, SOURCE_PURCHASE_REGISTER
+    register = app.state.result.records_read[SOURCE_PURCHASE_REGISTER]
+    b2 = app.state.result.records_read[SOURCE_GSTR2B]
+
+    assert "How to read these" in flat
+    assert f"{register:,} purchase-register records checked against" in flat
+    assert f"{b2:,} GSTR-2B rows" in flat
+    assert "Only the purchase-register side is scored" in flat
+    assert "read but not scored" in flat
+
+
+def test_total_rows_tile_breaks_the_number_into_its_two_sides(live):
+    base, app = live
+    _, body = fetch(base, "/")
+    from src.source_records import SOURCE_GSTR2B, SOURCE_PURCHASE_REGISTER
+    register = app.state.result.records_read[SOURCE_PURCHASE_REGISTER]
+    b2 = app.state.result.records_read[SOURCE_GSTR2B]
+    assert (f"{register:,} purchase-register records matched against "
+            f"{b2:,} GSTR-2B rows") in body
 
 
 def test_every_batch_source_reports_a_real_row_count(live):
@@ -581,9 +659,74 @@ def test_every_batch_source_reports_a_real_row_count(live):
 
 def test_batch_table_states_each_source_role(live):
     _, body = fetch(live[0], "/")
-    assert "consulted by the rule engine" in body
-    assert "not reconciled" in body
-    assert "counterparty side" in body
+    assert "the claim side — scored" in body
+    assert "matched against, not scored" in body
+
+
+def test_prior_period_is_a_reference_snapshot_outside_the_batch(live):
+    """It is looked up, never scored — so it must not read as batch input."""
+    import re
+    from src.source_records import SOURCE_PRIOR_PERIOD, load_source
+    base, app = live
+    _, body = fetch(base, "/")
+    flat = re.sub(r"\s+", " ", body)
+    prior = len(load_source(SOURCE_PRIOR_PERIOD))
+
+    assert "Reference snapshot (not part of the batch)" in flat
+    assert f'<td class="num">{prior:,}</td>' in body
+    assert "looked up, never scored" in flat
+    assert f"are <strong>not</strong> included in the "
+    assert f"not</strong> included in the {app.state.result.total_read:,}-row batch total" in flat
+
+
+def test_the_batch_total_excludes_the_reference_snapshot(live):
+    """The stated batch total must be the two reconciled files only."""
+    import re
+    base, app = live
+    _, body = fetch(base, "/")
+    flat = re.sub(r"\s+", " ", body)
+    from src.source_records import (SOURCE_GSTR2B, SOURCE_PRIOR_PERIOD,
+                                    SOURCE_PURCHASE_REGISTER, load_source)
+    read = app.state.result.records_read
+    total = app.state.result.total_read
+
+    assert total == read[SOURCE_PURCHASE_REGISTER] + read[SOURCE_GSTR2B]
+    assert total != total + len(load_source(SOURCE_PRIOR_PERIOD))
+    assert f"<strong>Batch total</strong>" in flat
+    assert f'<td class="num"><strong>{total:,}</strong></td>' in body
+
+
+def test_run_buttons_are_named_for_the_demo_batch(live):
+    _, body = fetch(live[0], "/")
+    assert "Run current demo batch" in body
+    assert "Run current batch with AI-assisted normalisation" in body
+    assert ">Run batch<" not in body
+    assert ">Run with AI-assisted normalisation<" not in body
+
+
+def test_the_review_queue_says_it_is_read_only(live):
+    """A reviewer must not think a decision can be recorded here."""
+    import re
+    _, body = fetch(live[0], "/")
+    flat = re.sub(r"\s+", " ", body)
+    assert "This queue is read-only" in flat
+    assert "no reviewer write-back" in flat
+    assert "no assignment and no escalation" in flat
+    assert "record_reviewer_decision()" in flat
+    assert "append-only" in flat
+
+
+def test_scope_labels_and_disclaimers_survived_the_relabelling(live):
+    """Nothing added here may quietly drop an existing qualifier."""
+    import re
+    base, app = live
+    _, body = fetch(base, "/")
+    flat = re.sub(r"\s+", " ", body)
+    for probe in ("Synthetic GSTR-2B-style data", "No live GSTN connectivity",
+                  "Not tax advice", "WHOLE BATCH", "does not split",
+                  "Upload is not offered", "frozen_test",
+                  "Reading the confidence column"):
+        assert probe in flat, probe
 
 
 def test_source_paths_render_with_forward_slashes(live):
