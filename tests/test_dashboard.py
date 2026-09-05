@@ -540,3 +540,77 @@ def test_dashboard_reports_only_this_runs_audit_rows(live):
     rows = list(csv.DictReader(io.StringIO(body)))
     assert len(rows) == app.state.result.scored
     assert len({e.run_id for e in app.state.result.audit_entries}) == 1
+
+
+# --------------------------------------------------------------------------
+# Denominators and labels that were misleading on first read
+# --------------------------------------------------------------------------
+
+def test_score_rate_is_against_the_scorable_population(live):
+    """Only register records are scored. Expressing 480 against all 990 rows
+    read implied half the batch was rejected — the opposite of the truth."""
+    base, app = live
+    _, body = fetch(base, "/")
+    from src.source_records import SOURCE_PURCHASE_REGISTER
+    register = app.state.result.records_read[SOURCE_PURCHASE_REGISTER]
+    scored = app.state.result.scored
+    quarantined = app.state.result.quarantined_count
+
+    assert f"{100 * scored / register:.1f}% of the {register:,} register records" in body
+    assert f"{100 * quarantined / register:.1f}% of the register" in body
+    # the old, misleading denominator must not reappear
+    assert f"{100 * scored / app.state.result.total_read:.1f}% of rows read" not in body
+
+
+def test_records_panel_explains_which_side_is_scored(live):
+    _, body = fetch(live[0], "/")
+    assert "Only purchase-register records are scored" in body
+    assert "counterparty side" in body
+
+
+def test_every_batch_source_reports_a_real_row_count(live):
+    """The prior-period snapshot IS read (§2.5); showing a dash made a file
+    that the rule engine depends on look skipped."""
+    from src.source_records import PIPELINE_SOURCES, load_source
+    base, _ = live
+    _, body = fetch(base, "/")
+    for name in PIPELINE_SOURCES:
+        assert f'<td class="num">{len(load_source(name)):,}</td>' in body
+    assert '<td class="num">—</td>' not in body
+
+
+def test_batch_table_states_each_source_role(live):
+    _, body = fetch(live[0], "/")
+    assert "consulted by the rule engine" in body
+    assert "not reconciled" in body
+    assert "counterparty side" in body
+
+
+def test_source_paths_render_with_forward_slashes(live):
+    """Backslashes on Windows made the paths disagree with the docs."""
+    _, body = fetch(live[0], "/")
+    assert "data/purchase_register.csv" in body
+    assert "\\" not in body.split("SOURCE FILE")[-1][:400]
+
+
+def test_zero_confidence_rows_are_explained_not_left_ambiguous(live):
+    """Confidence 0 on an absence case means 'no counterpart to compare',
+    not 'the rule is unsure'. Left bare it reads as the latter."""
+    import re
+    base, app = live
+    _, body = fetch(base, "/")
+    flat = re.sub(r"\s+", " ", body)
+
+    zero = [q for q in app.state.queue if not q.candidate_found]
+    assert zero, "expected some no-candidate records in the queue"
+    assert all(q.confidence == 0.0 for q in zero)
+    assert all(q.rule_id for q in zero), "each still carries a definite rule"
+
+    assert "no counterpart" in body
+    assert "Reading the confidence column" in flat
+    assert "not how sure the rule is" in flat
+
+
+def test_confidence_column_is_labelled_as_evidence_confidence(live):
+    _, body = fetch(live[0], "/")
+    assert "confidence 0-100" in body

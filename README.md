@@ -40,7 +40,7 @@ python3 -m src.pipeline --benchmark 3             # stable throughput (median of
 python3 -m src.pipeline --compare-ai              # deterministic vs AI-assisted
 python3 -m src.report                             # §2.7 report on the frozen 30%
 python3 -m src.dashboard                          # dashboard at http://127.0.0.1:8000
-python3 -m pytest tests/ -q                       # 588 tests
+python3 -m pytest tests/ -q                       # 595 tests
 ```
 
 `python3 calibrate.py --report-frozen` re-derives the confidence threshold.

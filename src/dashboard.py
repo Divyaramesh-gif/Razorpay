@@ -48,7 +48,9 @@ from .rule_engine import (
     STATUS_OUTSIDE_WINDOW,
     STATUS_WITHIN_WINDOW,
 )
-from .source_records import PIPELINE_SOURCES, REPO_ROOT
+from .source_records import (PIPELINE_SOURCES, REPO_ROOT,
+                             SOURCE_GSTR2B, SOURCE_PRIOR_PERIOD,
+                             SOURCE_PURCHASE_REGISTER, load_source)
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
@@ -102,6 +104,7 @@ class QueueRow:
     rule88d_status: str
     drc01c_status: str
     reason: str
+    candidate_found: bool = True
 
 
 @dataclass
@@ -153,6 +156,7 @@ def build_queue(result: P.PipelineResult, engine: RuleEngine) -> List[QueueRow]:
             rule88d_status=status88d,
             drc01c_status=drc.status if drc else "",
             reason=decision.reason,
+            candidate_found=row["evidence"].candidate_found,
         ))
 
     priority = {STATUS_OUTSIDE_WINDOW: 0, STATUS_WITHIN_WINDOW: 1,
@@ -343,14 +347,28 @@ def render_home(state: DashboardState) -> str:
     quarantined = result.quarantined_count
 
     # --- batch source + run control -------------------------------------
-    sources = "".join(
-        f"<tr><td><code>{esc(os.path.relpath(path, REPO_ROOT))}</code></td>"
-        f'<td class="num">{result.records_read.get(name, "—")}</td></tr>'
-        for name, path in PIPELINE_SOURCES.items()
-    )
+    # The prior-period snapshot is read by the rule engine (§2.5) rather than
+    # reconciled, so it is absent from records_read. Showing a dash made a file
+    # that IS read look skipped.
+    roles = {
+        SOURCE_PURCHASE_REGISTER: "reconciled — the claim side",
+        SOURCE_GSTR2B: "reconciled — the counterparty side",
+        SOURCE_PRIOR_PERIOD: "consulted by the rule engine (§2.5), not reconciled",
+    }
+    sources = ""
+    for name, path in PIPELINE_SOURCES.items():
+        rows = result.records_read.get(name)
+        if rows is None:
+            rows = len(load_source(name))
+        sources += (
+            f'<tr><td><code>{esc(path.replace(os.sep, "/").split("Razorpay/")[-1])}'
+            f"</code></td>"
+            f'<td class="num">{rows:,}</td>'
+            f"<td>{esc(roles.get(name, ''))}</td></tr>")
     batch = f"""<h2>Batch</h2><div class="panel">
 <div class="scroll"><table><thead><tr><th>Source file</th>
-<th class="num">Rows read</th></tr></thead><tbody>{sources}</tbody></table></div>
+<th class="num">Rows read</th><th>Role</th></tr></thead>
+<tbody>{sources}</tbody></table></div>
 <div class="row" style="margin-top:12px">
   <form method="post" action="/run"><button class="btn" type="submit">Run batch</button></form>
   <form method="post" action="/run"><input type="hidden" name="ai" value="1">
@@ -363,13 +381,26 @@ is stubbed to look like an upload that does not work.</p></div>"""
 
     # --- record counts ---------------------------------------------------
     q_role, q_colour, q_glyph = STATUS["quarantined"]
+    # Only purchase-register records are scored — GSTR-2B is the counterparty
+    # side. Expressing the score rate against every row read (both files) would
+    # imply half the batch was rejected — the opposite of what happened.
+    register_rows = result.records_read.get(SOURCE_PURCHASE_REGISTER, 0)
+    b2_rows = result.records_read.get(SOURCE_GSTR2B, 0)
     tiles = (
-        tile("Total records read", f"{total:,}", "purchase register + GSTR-2B")
+        tile("Total rows read", f"{total:,}",
+             f"{register_rows:,} register + {b2_rows:,} GSTR-2B")
         + tile("Valid (scored)", f"{scored:,}",
-               f"{100 * scored / total:.1f}% of rows read" if total else "")
+               f"{100 * scored / register_rows:.1f}% of the {register_rows:,} "
+               f"register records" if register_rows else "")
         + tile("Quarantined", f"{quarantined:,}",
-               "failed input validation — never scored")
+               f"{100 * quarantined / register_rows:.1f}% of the register — "
+               f"failed input validation" if register_rows else
+               "failed input validation")
     )
+    records_note = (
+        '<p class="note">Only purchase-register records are scored; GSTR-2B is '
+        'the counterparty side they are matched against. A register record is '
+        'either scored or quarantined — never both, never neither.</p>')
 
     # --- outcome distribution -------------------------------------------
     segs, legend, otiles = "", "", ""
@@ -458,8 +489,12 @@ is stubbed to look like an upload that does not work.</p></div>"""
                  f'<td><code>{esc(q.invoice_id)}</code></td>'
                  f'<td>{badge(q.outcome)}</td>'
                  f'<td><code>{esc(q.rule_id or "—")}</code> {esc(q.category or "")}</td>'
-                 f'<td class="num">{q.confidence:.1f}</td>'
-                 f'<td class="num">{money(q.itc_at_risk)}</td>'
+                 f'<td class="num">{q.confidence:.1f}'
+                 + ('<br><span style="font-weight:400;font-size:11px;'
+                    'color:var(--ink-3)">no counterpart</span>'
+                    if not q.candidate_found else "")
+                 + '</td>'
+                 + f'<td class="num">{money(q.itc_at_risk)}</td>'
                  f'<td>{flag} {drc}</td></tr>')
 
     queue_panel = f"""<h2>Exception &amp; review queue</h2><div class="panel">
@@ -468,8 +503,14 @@ auto-reconciled. Ordered by <strong>review risk</strong>: Rule 88D window
 closed first, then still open, then not applicable — each group by ITC at risk,
 descending. That ordering uses existing figures only; no severity score is
 invented. Showing the first {min(60, len(state.queue))}.</p>
+<p class="note"><strong>Reading the confidence column.</strong> It is the
+weighted count of matching <em>evidence</em> fields (§2.6) — not how sure the
+rule is. A record with no counterpart in GSTR-2B scores 0 because there is
+nothing to compare, yet its classification is definite: the invoice is absent,
+and the prior-period snapshot says whether that is a late-filed supplier or an
+invoice removed after the claim.</p>
 <div class="scroll"><table><thead><tr><th>Record</th><th>Invoice</th>
-<th>Outcome</th><th>Rule</th><th class="num">Confidence</th>
+<th>Outcome</th><th>Rule</th><th class="num">Evidence<br><span style="font-weight:400;text-transform:none">confidence 0-100</span></th>
 <th class="num">ITC at risk<br><span style="font-weight:400;text-transform:none">per record</span></th><th>Operational</th></tr></thead>
 <tbody>{rows}</tbody></table></div></div>"""
 
@@ -498,7 +539,7 @@ count. <a href="/quarantine">View all</a></p>
 own values; TXT is the §2.7 evaluation report verbatim.</p></div>"""
 
     return page("Dashboard", f"""{masthead(state)}
-<h2>Records</h2><div class="tiles">{tiles}</div>
+<h2>Records</h2><div class="tiles">{tiles}</div>{records_note}
 <h2>Gate outcomes</h2><div class="panel">
 <div class="bar">{segs}</div><div class="legend">{legend}</div></div>
 <div class="tiles" style="margin-top:10px">{otiles}</div>
