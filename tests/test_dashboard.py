@@ -694,6 +694,8 @@ def test_the_batch_total_excludes_the_reference_snapshot(live):
     assert total != total + len(load_source(SOURCE_PRIOR_PERIOD))
     assert f"<strong>Batch total</strong>" in flat
     assert f'<td class="num"><strong>{total:,}</strong></td>' in body
+    assert "source rows read for this batch" in flat
+    assert "rows read and reconciled" not in flat
 
 
 def test_run_buttons_are_named_for_the_demo_batch(live):
@@ -729,11 +731,99 @@ def test_scope_labels_and_disclaimers_survived_the_relabelling(live):
         assert probe in flat, probe
 
 
-def test_source_paths_render_with_forward_slashes(live):
-    """Backslashes on Windows made the paths disagree with the docs."""
+# --------------------------------------------------------------------------
+# Paths on screen must be repository-relative, never absolute or local
+# --------------------------------------------------------------------------
+# An absolute path leaks the operator's home directory, differs on every
+# machine, and makes a screenshot stop matching the documentation.
+
+ABSOLUTE_PATH_PATTERNS = [
+    (r"[A-Za-z]:[\\/]", "a Windows drive-letter path"),
+    (r"/home/[A-Za-z0-9_.-]+/", "a Linux home directory"),
+    (r"/Users/[A-Za-z0-9_.-]+/", "a macOS home directory"),
+    (r"\\\\[A-Za-z0-9_.-]+\\\\", "a UNC network path"),
+    (r"[A-Za-z0-9_.-]+\\\\[A-Za-z0-9_.-]+\\.csv", "a backslash-separated CSV path"),
+]
+
+HTML_ROUTES = ["/", "/quarantine"]
+
+
+def test_source_paths_render_relative_and_forward_slashed(live):
     _, body = fetch(live[0], "/")
-    assert "data/purchase_register.csv" in body
-    assert "\\" not in body.split("SOURCE FILE")[-1][:400]
+    for name in ("purchase_register", "gstr2b", "gstr2b_prior_period"):
+        assert f"data/{name}.csv" in body
+
+
+@pytest.mark.parametrize("route", HTML_ROUTES)
+def test_no_absolute_path_appears_in_rendered_html(live, route):
+    import re
+    status, body = fetch(live[0], route)
+    assert status == 200
+    for pattern, description in ABSOLUTE_PATH_PATTERNS:
+        match = re.search(pattern, body)
+        assert match is None, \
+            f"{route} leaks {description}: {body[max(0, match.start()-40):match.end()+40]!r}"
+
+
+def test_no_absolute_path_on_a_record_page(live, samples):
+    import re
+    for kind, record_id in samples.items():
+        _, body = fetch(live[0],
+                        "/record?id=" + urllib.parse.quote(record_id))
+        for pattern, description in ABSOLUTE_PATH_PATTERNS:
+            assert re.search(pattern, body) is None, \
+                f"record page ({kind}) leaks {description}"
+
+
+def test_the_repository_root_never_appears_on_screen(live):
+    """The single most direct check: REPO_ROOT is an absolute path."""
+    from src.source_records import REPO_ROOT
+    for route in HTML_ROUTES:
+        _, body = fetch(live[0], route)
+        assert REPO_ROOT not in body, f"{route} contains REPO_ROOT verbatim"
+        assert REPO_ROOT.replace(os.sep, "/") not in body
+
+
+def test_rel_path_strips_the_repository_root():
+    from src.source_records import PIPELINE_SOURCES, REPO_ROOT
+    for path in PIPELINE_SOURCES.values():
+        rendered = D.rel_path(path)
+        assert not os.path.isabs(rendered)
+        assert REPO_ROOT not in rendered
+        assert "\\" not in rendered
+        assert rendered.startswith("data/")
+
+
+@pytest.mark.parametrize("path,expected", [
+    (r"C:\Users\dev\proj\data\x.csv", "x.csv"),          # foreign drive
+    ("/etc/passwd", "passwd"),                              # outside the repo
+    ("relative/already.csv", "relative/already.csv"),        # already relative
+])
+def test_rel_path_never_returns_an_absolute_path(path, expected):
+    rendered = D.rel_path(path)
+    assert rendered == expected
+    assert not os.path.isabs(rendered)
+    assert "\\" not in rendered
+
+
+def test_rel_path_does_not_depend_on_the_checkout_directory_name(monkeypatch):
+    """The previous implementation split on a hard-coded folder name, so it
+    fell through to the absolute path on any checkout named differently.
+
+    Checked behaviourally rather than by scanning text: the module names the
+    old folder in a docstring explaining the bug, which is worth keeping.
+    """
+    for folder in ("/srv/gst-recon", "/home/dev/my project", "/opt/x"):
+        monkeypatch.setattr(D, "REPO_ROOT", folder)
+        rendered = D.rel_path(f"{folder}/data/purchase_register.csv")
+        assert rendered == "data/purchase_register.csv", folder
+        assert not os.path.isabs(rendered)
+
+
+def test_the_broken_split_idiom_is_gone():
+    source = open(os.path.join(REPO, "src", "dashboard.py"),
+                  encoding="utf-8").read()
+    assert 'split("Razorpay/")' not in source
 
 
 def test_zero_confidence_rows_are_explained_not_left_ambiguous(live):

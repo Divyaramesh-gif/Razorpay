@@ -31,6 +31,7 @@ import html
 import io
 import json
 import os
+import re
 import threading
 import urllib.parse
 from dataclasses import dataclass, field
@@ -71,6 +72,9 @@ STATUS = {
     G.INDETERMINATE: ("critical", "#d03b3b", "▲"),
     "quarantined": ("warning", "#fab219", "■"),
 }
+
+# A leading drive letter (C:, D:) means the path escaped the repository.
+DRIVE_LETTER = re.compile(r"^[A-Za-z]:")
 
 DISCLAIMER = (
     "Synthetic GSTR-2B-style data. No live GSTN connectivity. Not tax advice."
@@ -294,6 +298,36 @@ def esc(value: Any) -> str:
     return html.escape("" if value is None else str(value))
 
 
+def rel_path(path: str) -> str:
+    """A repository-relative, forward-slash path fit to put on screen.
+
+    Absolute paths leak the operator's home directory and differ per machine,
+    so a screenshot stops matching the docs. `REPO_ROOT` is derived from this
+    module's own location, so the result is correct wherever the checkout
+    lives — unlike splitting on a hard-coded directory name, which silently
+    fell through to the absolute path on any checkout not called "Razorpay".
+
+    A path outside the repository falls back to its basename rather than a
+    trail of `../` segments; nothing on screen needs to point outside.
+    """
+    # Normalise separators first, unconditionally: a Windows-style path must
+    # render the same way whichever platform is doing the rendering.
+    normalised = str(path).replace("\\", "/")
+    root = REPO_ROOT.replace("\\", "/").rstrip("/")
+    basename = normalised.rstrip("/").rsplit("/", 1)[-1]
+
+    if normalised.startswith(root + "/"):
+        return normalised[len(root) + 1:]
+    try:
+        relative = os.path.relpath(os.path.abspath(path), REPO_ROOT)
+    except ValueError:                       # different drive on Windows
+        return basename
+    relative = relative.replace("\\", "/").replace(os.sep, "/")
+    if relative.startswith("../") or relative == ".." or DRIVE_LETTER.match(relative):
+        return basename
+    return relative
+
+
 def money(value: Optional[float]) -> str:
     return "—" if value is None else f"₹{value:,.2f}"
 
@@ -350,9 +384,6 @@ def render_home(state: DashboardState) -> str:
     # The prior-period snapshot is read by the rule engine (§2.5) rather than
     # reconciled, so it is absent from records_read. Showing a dash made a file
     # that IS read look skipped.
-    def rel(path: str) -> str:
-        return path.replace(os.sep, "/").split("Razorpay/")[-1]
-
     # The two reconciled files are the batch. The prior-period snapshot is a
     # REFERENCE the rule engine consults (§2.5) — it is listed separately and
     # is deliberately NOT part of the batch total, because nothing in it is
@@ -364,20 +395,20 @@ def render_home(state: DashboardState) -> str:
     sources = ""
     for name in (SOURCE_PURCHASE_REGISTER, SOURCE_GSTR2B):
         sources += (
-            f'<tr><td><code>{esc(rel(PIPELINE_SOURCES[name]))}</code></td>'
+            f'<tr><td><code>{esc(rel_path(PIPELINE_SOURCES[name]))}</code></td>'
             f'<td class="num">{result.records_read.get(name, 0):,}</td>'
             f"<td>{esc(roles[name])}</td></tr>")
     sources += (
         f'<tr style="border-top:2px solid var(--line)">'
         f'<td><strong>Batch total</strong></td>'
         f'<td class="num"><strong>{total:,}</strong></td>'
-        f'<td>rows read and reconciled</td></tr>')
+        f'<td>source rows read for this batch</td></tr>')
 
     prior_rows = len(load_source(SOURCE_PRIOR_PERIOD))
     prior_panel = f"""<div class="scroll" style="margin-top:14px">
 <table><thead><tr><th>Reference snapshot (not part of the batch)</th>
 <th class="num">Rows</th><th>Role</th></tr></thead><tbody>
-<tr><td><code>{esc(rel(PIPELINE_SOURCES[SOURCE_PRIOR_PERIOD]))}</code></td>
+<tr><td><code>{esc(rel_path(PIPELINE_SOURCES[SOURCE_PRIOR_PERIOD]))}</code></td>
 <td class="num">{prior_rows:,}</td>
 <td>prior-period GSTR-2B, consulted by the rule engine (§2.5)</td></tr>
 </tbody></table></div>
