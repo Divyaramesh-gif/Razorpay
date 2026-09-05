@@ -110,8 +110,8 @@ the dataset byte-for-byte from seed `20260401`.
 
 ## Architecture compliance
 
-Built against `Architecture_v2_FINAL.pdf` (in this repository), following its
-build order exactly. All 8 steps complete. Four documented deviations, each
+Built against [`ARCHITECTURE.pdf`](ARCHITECTURE.pdf) (in this repository),
+following its build order exactly. All 8 steps complete. Four documented deviations, each
 because the spec required something no listed file could hold:
 
 | Addition | Why |
@@ -145,7 +145,7 @@ because the spec required something no listed file could hold:
 ## Repository map
 
 ```
-Architecture_v2_FINAL.pdf   the locked specification
+ARCHITECTURE.pdf            the locked specification
 data/generate_dataset.py    seeded synthetic dataset + ground truth
 src/validation.py           §2.1 input validation
 src/quarantine_log.py       §3.3 quarantine (append-only)
