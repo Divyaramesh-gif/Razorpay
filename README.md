@@ -376,7 +376,9 @@ document that qualifies it.
   call itself is unproven. `python3 -m src.pipeline --ai` on a machine with
   credentials closes that gap.
 - **Human review is a queue, not a workflow.** `reviewer_decision` is nullable
-  and `pending_review()` lists what is waiting. There is no UI, assignment,
-  or escalation.
+  and `pending_review()` lists what is waiting. The dashboard is a local
+  read-only view of it: no upload, no reviewer write-back, no assignment, no
+  escalation. Decisions are appended via `audit_log.record_reviewer_decision()`
+  outside the UI.
 - **Single batch, single period.** No multi-period carry-forward, no
   amendment tracking, no incremental runs.

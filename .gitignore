@@ -9,5 +9,5 @@ venv/
 *.db
 .DS_Store
 
-# Phase 2+ derived artifacts — regenerate with: python3 run_phase2.py
+# Derived artifacts — regenerate with: python3 -m src.pipeline
 out/
